@@ -8,8 +8,9 @@ use parent qw( Exporter );
 use Test2::API qw( context );
 use Test2::Compare ();
 use URI;
+use Carp ();
 
-our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response );
+our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content );
 our @EXPORT_OK = (@EXPORT);
 
 # ABSTRACT: Test HTTP / PSGI
@@ -83,6 +84,74 @@ sub http_response (&)
     'Test2::Tools::HTTP::ResponseCompare',
     @_,
   );
+}
+
+=head2 http_code
+
+=cut
+
+sub _build
+{
+  defined(my $build = Test2::Compare::get_build()) or Carp::croak "No current build!";
+  Carp::croak "'$build' is not a Test2::Tools::HTTP::ResponseCompare"
+    unless $build->isa('Test2::Tools::HTTP::ResponseCompare');
+
+  my $i = 1;
+  my @caller;
+  while(@caller = caller $i)
+  {
+    last if $caller[0] ne __PACKAGE__;
+    $i++;
+  }
+
+  my $func_name = $caller[3];
+  $func_name =~ s/^.*:://;
+  Carp::croak "'$func_name' should only ever be called in void context"
+    if defined $caller[5];
+
+  ($build, file => $caller[1], lines => [$caller[2]]);
+}
+
+sub _add_call
+{
+  my($name, $expect, $context) = @_;
+  $context ||= 'scalar';
+  my($build, @cmpargs) = _build;
+  $build->add_call(
+    $name,
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),
+    undef,
+    $context
+  );
+}
+
+sub http_code ($)
+{
+  my($expect) = @_;
+  _add_call('code', $expect);
+}
+
+=head2 http_message
+
+=cut
+
+sub http_message ($)
+{
+  my($expect) = @_;
+  _add_call('message', $expect);
+}
+
+=head2 http_content
+
+=cut
+
+sub http_content ($)
+{
+  my($expect) = @_;
+  _add_call('decoded_content', $expect);
 }
 
 =head2 http_base_url

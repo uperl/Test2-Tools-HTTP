@@ -8,6 +8,18 @@ Test HTTP / PSGI
 
     http_request($request, $check, $message);
 
+## http\_response
+
+    my $check = http_response {
+      ... # object or http checks
+    };
+
+## http\_code
+
+## http\_message
+
+## http\_content
+
 ## http\_base\_url
 
     http_base_url($url);

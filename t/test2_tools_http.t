@@ -202,7 +202,7 @@ subtest psgi => sub {
     intercept {
       http_request(
         GET('http://psgi-app.test/'),
-        object {
+        http_response {
           call code => 200;
         },
       );
@@ -220,7 +220,7 @@ subtest psgi => sub {
     intercept {
       http_request(
         GET('http://psgi-app.test/'),
-        object {
+        http_response {
           call code => 201;
         },
       );
@@ -233,6 +233,8 @@ subtest psgi => sub {
       etc;
     },
   );
+
+  psgi_app_del;
 
 };
 
@@ -267,6 +269,101 @@ subtest 'http_response' => sub {
       etc;
     },
   );
+
+};
+
+subtest 'basic calls code, message, content' => sub {
+
+  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'some text' ] ] };
+
+  http_request(
+    GET('http://psgi-app.test/'),
+    http_response {
+      http_code 200;
+      http_message 'OK';
+      http_content 'some text';
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://psgi-app.test/'),
+        http_response {
+          http_code 201;
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://psgi-app.test/'),
+        http_response {
+          http_message 'Created';
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://psgi-app.test/'),
+        http_response {
+          http_content 'bad';
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  eval { http_code 200 };
+  like $@, qr/No current build!/;
+
+  eval {
+    intercept {
+      http_request(
+        GET('/'),
+        object {
+          http_code 200;
+        },
+      );
+    };
+  };
+  like $@, qr/'Test2::Compare::Object=HASH\(.*?\)' is not a Test2::Tools::HTTP::ResponseCompare/;
+
+  eval {
+    intercept {
+      http_request(
+        GET('/'),
+        http_response {
+          my $x = http_code 200;
+        },
+      );
+    }
+  };
+  like $@, qr/'http_code' should only ever be called in void contex/;
+
+  psgi_app_del;
 
 };
 
