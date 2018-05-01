@@ -194,47 +194,75 @@ EOM
 
 subtest psgi => sub {
 
-  http_base_url 'http://psgi-app.test';
+  subtest 'single' => sub {
 
-  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'some text' ] ] };
+    http_base_url 'http://psgi-app.test';
 
-  is(
-    intercept {
-      http_request(
-        GET('http://psgi-app.test/'),
-        http_response {
-          call code => 200;
-        },
-      );
-    },
-    array {
-      event Ok => sub {
-        call pass => T();
-        call name => 'GET http://psgi-app.test/';
-      };
-      end;
-    },
-  );
+    psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'some text' ] ] };
 
-  is(
-    intercept {
-      http_request(
-        GET('http://psgi-app.test/'),
-        http_response {
-          call code => 201;
-        },
-      );
-    },
-    array {
-      event Ok => sub {
-        call pass => F();
-        call name => 'GET http://psgi-app.test/';
-      };
-      etc;
-    },
-  );
+    is(
+      intercept {
+        http_request(
+          GET('http://psgi-app.test/'),
+          http_response {
+            call code => 200;
+          },
+        );
+      },
+      array {
+        event Ok => sub {
+          call pass => T();
+          call name => 'GET http://psgi-app.test/';
+        };
+        end;
+      },
+    );
 
-  psgi_app_del;
+    is(
+      intercept {
+        http_request(
+          GET('http://psgi-app.test/'),
+          http_response {
+            call code => 201;
+          },
+        );
+      },
+      array {
+        event Ok => sub {
+          call pass => F();
+          call name => 'GET http://psgi-app.test/';
+        };
+        etc;
+      },
+    );
+
+    psgi_app_del;
+
+  };
+
+  subtest 'double' => sub {
+
+    psgi_app_add 'http://myhost1.test:8001' => sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'app 1' ] ] };
+    psgi_app_add 'http://myhost2.test:8002' => sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'app 2' ] ] };
+
+    http_request(
+      GET('http://myhost1.test:8001/foo/bar/baz'),
+      http_response {
+        http_content 'app 1';
+      },
+    );
+
+    http_request(
+      GET('http://myhost2.test:8002/foo/bar/baz'),
+      http_response {
+        http_content 'app 2';
+      },
+    );
+
+    psgi_app_del 'http://myhost1.test:8001';
+    psgi_app_del 'http://myhost2.test:8002';
+  
+  };
 
 };
 

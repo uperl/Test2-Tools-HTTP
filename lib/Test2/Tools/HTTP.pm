@@ -246,6 +246,11 @@ sub psgi_app_del
   return;
 }
 
+# TODO: is_info, is_success, is_redirect, is_error is_client_error is_server_error
+# TODO: content_type, content_type_charset, content_length, content_length_ok, location
+# TODO: header $key => $check
+# TODO: cookie $key => $check ??
+
 package Test2::Tools::HTTP::ResponseCompare;
 
 use parent 'Test2::Compare::Object';

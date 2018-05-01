@@ -14,7 +14,7 @@ $modules{$_} = $_ for qw(
   HTTP::Request
   HTTP::Request::Common
   LWP::UserAgent
-  Plack::Test
+  Plack
   Test2::API
   Test2::Compare
   Test2::Compare::Object
