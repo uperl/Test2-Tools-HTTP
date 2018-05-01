@@ -2,6 +2,16 @@
 
 Test HTTP / PSGI
 
+# FUNCTIONS
+
+## http\_request
+
+    http_request($request, $check, $message);
+
+## http\_ua
+
+    my $ua = http_ua;
+
 # AUTHOR
 
 Graham Ollis <plicease@cpan.org>

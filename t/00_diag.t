@@ -10,8 +10,12 @@ my %modules;
 my $post_diag;
 
 $modules{$_} = $_ for qw(
+  Exporter
   ExtUtils::MakeMaker
+  HTTP::Request::Common
   IO::Socket::INET
+  LWP::UserAgent
+  Test2::API
   Test2::Require
   Test2::V0
   parent
