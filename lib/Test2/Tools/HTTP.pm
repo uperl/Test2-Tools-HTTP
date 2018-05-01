@@ -9,7 +9,7 @@ use Test2::API qw( context );
 use Test2::Compare ();
 use URI;
 
-our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del );
+our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response );
 our @EXPORT_OK = (@EXPORT);
 
 # ABSTRACT: Test HTTP / PSGI
@@ -67,6 +67,22 @@ sub http_request
   $ctx->ok($ok, $message, \@diag);
   $ctx->release;
   $ok;
+}
+
+=head2 http_response
+
+ my $check = http_response {
+   ... # object or http checks
+ };
+
+=cut
+
+sub http_response (&)
+{
+  Test2::Compare::build(
+    'Test2::Tools::HTTP::ResponseCompare',
+    @_,
+  );
 }
 
 =head2 http_base_url
@@ -160,5 +176,12 @@ sub psgi_app_del
   delete $psgi{$key};
   return;
 }
+
+package Test2::Tools::HTTP::ResponseCompare;
+
+use parent 'Test2::Compare::Object';
+
+sub name { '<HTTP::Response>' }
+sub object_base { 'HTTP::Response' }
 
 1;

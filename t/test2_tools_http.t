@@ -236,4 +236,38 @@ subtest psgi => sub {
 
 };
 
+subtest 'http_response' => sub {
+
+  is(
+    intercept {
+      is(
+        HTTP::Response->new(GET => 'http://localhost/'),
+        http_response {},
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+  );
+
+  is(
+    intercept {
+      is(
+        bless({}, 'Foo::Bar'),
+        http_response {},
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+};
+
 done_testing
