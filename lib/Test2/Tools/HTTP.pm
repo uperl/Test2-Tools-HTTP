@@ -21,8 +21,6 @@ our @EXPORT    = qw( http_request http_ua );
 
 =cut
 
-our $res;
-
 sub http_request
 {
   my($request, $check, $message) = @_;
@@ -33,7 +31,7 @@ sub http_request
   my $ok = 1;
   my @diag;
   
-  local $res = http_ua()->simple_request($request);
+  my $res = http_ua()->simple_request($request);
 
   if(my $warning = $res->header('Client-Warning'))
   {
