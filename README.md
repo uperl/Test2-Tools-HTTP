@@ -8,9 +8,25 @@ Test HTTP / PSGI
 
     http_request($request, $check, $message);
 
+## http\_base\_url
+
+    http_base_url($url);
+    my $url = http_base_url;
+
 ## http\_ua
 
+    http_ua(LWP::UserAgent->new);
     my $ua = http_ua;
+
+## psgi\_app\_add
+
+    psgi_app_add $app;
+    psgi_app_add $url, $app;
+
+## psgi\_app\_del
+
+    psgi_app_del;
+    psgi_app_del $url;
 
 # AUTHOR
 

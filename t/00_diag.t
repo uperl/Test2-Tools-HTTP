@@ -12,12 +12,18 @@ my $post_diag;
 $modules{$_} = $_ for qw(
   Exporter
   ExtUtils::MakeMaker
+  HTTP::Request
   HTTP::Request::Common
   IO::Socket::INET
   LWP::UserAgent
+  Plack::Test
   Test2::API
+  Test2::Compare
+  Test2::Mock
   Test2::Require
+  Test2::Tools::URL
   Test2::V0
+  URI
   parent
 );
 
