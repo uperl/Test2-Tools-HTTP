@@ -3,9 +3,11 @@ use Test2::Tools::HTTP;
 use Test2::Require::Internet -tcp => [ 'httpbin.org', 'http' ];
 use HTTP::Request::Common;
 
+my $res;
+
 is(
   intercept {
-    http_request(
+    $res = http_request(
       GET('http://httpbin.org/status/200'),
     );
   },
@@ -18,9 +20,11 @@ is(
   },
 );
 
+is($res, T());
+
 is(
   intercept {
-    http_request(
+    $res = http_request(
       GET('http://bogus.httpbin.org/status/200'),
     );
   },
@@ -34,5 +38,7 @@ is(
     end;
   },
 );
+
+is($res, F());
 
 done_testing

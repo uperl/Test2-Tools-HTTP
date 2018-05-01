@@ -40,8 +40,8 @@ sub http_request
   }
 
   $ctx->ok($ok, $message, \@diag);
-
   $ctx->release;
+  $ok;
 }
 
 =head2 http_ua
