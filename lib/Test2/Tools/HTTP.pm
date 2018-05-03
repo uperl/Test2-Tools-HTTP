@@ -46,6 +46,7 @@ sub http_request
   my $ok = 1;
   my @diag;
   my $res;
+  my $connection_error = 0;
 
   if(my $tester = $psgi{$key})
   {
@@ -65,6 +66,7 @@ sub http_request
   if(my $warning = $res->header('Client-Warning'))
   {
     $ok = 0;
+    $connection_error = 1;
     push @diag, "connection error: " . ($res->decoded_content || $warning);
   }
 
@@ -81,7 +83,7 @@ sub http_request
   $ctx->ok($ok, $message, \@diag);
   $ctx->release;
 
-  $last = bless { req => $req, res => $res, ok => $ok }, 'Test2::Tools::HTTP::Last';
+  $last = bless { req => $req, res => $res, ok => $ok, connection_error => $connection_error }, 'Test2::Tools::HTTP::Last';
   
   $ok;
 }
@@ -325,6 +327,7 @@ package Test2::Tools::HTTP::Last;
 sub req { shift->{req} }
 sub res { shift->{res} }
 sub ok  { shift->{ok}  }
+sub connection_error { shift->{connection_error} }
 
 sub _note_or_diag
 {

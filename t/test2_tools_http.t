@@ -109,6 +109,7 @@ EOM
     isa_ok(http_last->req, 'HTTP::Request');
     isa_ok(http_last->res, 'HTTP::Response');
     is(http_last->ok, T());
+    is(http_last->connection_error, F());
 
     is $ret, T();
 
@@ -190,6 +191,7 @@ EOM
     isa_ok(http_last->req, 'HTTP::Request');
     isa_ok(http_last->res, 'HTTP::Response');
     is(http_last->ok, F());
+    is(http_last->connection_error, T());
 
     is($ret, F());
 
