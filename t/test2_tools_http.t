@@ -58,6 +58,8 @@ subtest 'basic' => sub {
   my $req;
   my $res;
 
+  is( http_last, undef, 'http_last starts out as undef' );
+
   my $mock = Test2::Mock->new( class => 'LWP::UserAgent' );
 
   $mock->override('simple_request' => sub {
@@ -68,7 +70,7 @@ subtest 'basic' => sub {
   subtest 'good' => sub {
 
     undef $req;
-    $res = HTTP::Request->parse(<<'EOM');
+    $res = HTTP::Response->parse(<<'EOM');
 HTTP/1.1 200 OK
 Connection: close
 Date: Tue, 01 May 2018 13:03:23 GMT
@@ -102,6 +104,11 @@ EOM
         end;
       },
     );
+
+    isa_ok http_last, 'Test2::Tools::HTTP::Last';
+    isa_ok(http_last->req, 'HTTP::Request');
+    isa_ok(http_last->res, 'HTTP::Response');
+    is(http_last->ok, T());
 
     is $ret, T();
 
@@ -148,7 +155,7 @@ EOM
   subtest 'bad' => sub {
 
     undef $req;
-    $res = HTTP::Request->parse(<<'EOM');
+    $res = HTTP::Response->parse(<<'EOM');
 500 Can't connect to bogus.httpbin.org:80 (Name or service not known)
 Content-Type: text/plain
 Client-Date: Tue, 01 May 2018 13:36:43 GMT
@@ -178,6 +185,11 @@ EOM
         end;
       },
     );
+
+    isa_ok http_last, 'Test2::Tools::HTTP::Last';
+    isa_ok(http_last->req, 'HTTP::Request');
+    isa_ok(http_last->res, 'HTTP::Response');
+    is(http_last->ok, F());
 
     is($ret, F());
 
@@ -219,6 +231,11 @@ subtest psgi => sub {
       },
     );
 
+    isa_ok http_last, 'Test2::Tools::HTTP::Last';
+    isa_ok(http_last->req, 'HTTP::Request');
+    isa_ok(http_last->res, 'HTTP::Response');
+    is(http_last->ok, T());
+
     is(
       intercept {
         http_request(
@@ -236,6 +253,11 @@ subtest psgi => sub {
         etc;
       },
     );
+
+    isa_ok http_last, 'Test2::Tools::HTTP::Last';
+    isa_ok(http_last->req, 'HTTP::Request');
+    isa_ok(http_last->res, 'HTTP::Response');
+    is(http_last->ok, F());
 
     psgi_app_del;
 

@@ -8,12 +8,13 @@ use parent qw( Exporter );
 use Test2::API qw( context );
 use Test2::Compare;
 use Test2::Compare::Wildcard;
+use Test2::Tools::Compare ();
 use JSON::MaybeXS qw( decode_json );
 use JSON::Pointer;
 use URI;
 use Carp ();
 
-our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json );
+our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success );
 our @EXPORT_OK = (@EXPORT);
 
 # ABSTRACT: Test HTTP / PSGI
@@ -28,15 +29,18 @@ our @EXPORT_OK = (@EXPORT);
 =cut
 
 my %psgi;
+my $last;
 
 sub http_request
 {
-  my($request, $check, $message) = @_;
+  my($req, $check, $message) = @_;
 
-  my $url = URI->new_abs($request->uri, http_base_url());
+  $req = $req->clone;
+
+  my $url = URI->new_abs($req->uri, http_base_url());
   my $key = _uri_key($url);
 
-  $message ||= "@{[ $request->method ]} @{[ $url ]}";
+  $message ||= "@{[ $req->method ]} @{[ $url ]}";
 
   my $ctx = context();
   my $ok = 1;
@@ -45,11 +49,17 @@ sub http_request
 
   if(my $tester = $psgi{$key})
   {
-    $res = $tester->request($request);
+    $res = $tester->request($req);
   }
   else
   {
-    $res = http_ua()->simple_request($request);
+    if($req->uri =~ /^\//)
+    {
+      $req->uri(
+        URI->new_abs($req->uri, http_base_url())->as_string
+      );
+    }
+    $res = http_ua()->simple_request($req);
   }
 
   if(my $warning = $res->header('Client-Warning'))
@@ -70,6 +80,9 @@ sub http_request
 
   $ctx->ok($ok, $message, \@diag);
   $ctx->release;
+
+  $last = bless { req => $req, res => $res, ok => $ok }, 'Test2::Tools::HTTP::Last';
+  
   $ok;
 }
 
@@ -191,6 +204,30 @@ sub http_json
   );
 }
 
+=head2 http_is_success
+
+=cut
+
+sub http_is_success
+{
+  my($expect) = @_;
+  _add_call('is_success', Test2::Tools::Compare::T());
+}
+
+# TODO: is_info, is_success, is_redirect, is_error is_client_error is_server_error
+# TODO: content_type, content_type_charset, content_length, content_length_ok, location
+# TODO: header $key => $check
+# TODO: cookie $key => $check ??
+
+=head2 http_last
+
+=cut
+
+sub http_last
+{
+  $last;
+}
+
 =head2 http_base_url
 
  http_base_url($url);
@@ -283,10 +320,28 @@ sub psgi_app_del
   return;
 }
 
-# TODO: is_info, is_success, is_redirect, is_error is_client_error is_server_error
-# TODO: content_type, content_type_charset, content_length, content_length_ok, location
-# TODO: header $key => $check
-# TODO: cookie $key => $check ??
+package Test2::Tools::HTTP::Last;
+
+sub req { shift->{req} }
+sub res { shift->{res} }
+sub ok  { shift->{ok}  }
+
+# TODO: truncate the response body if it is too large?
+sub note
+{
+  my($self) = shift;
+  my $ctx = Test2::API::context();
+  $ctx->note($_) for ($self->req->as_string, $self->res->as_string, "ok = " . $self->ok);
+  $ctx->release;
+}
+
+sub diag
+{
+  my($self) = shift;
+  my $ctx = Test2::API::context();
+  $ctx->diag($_) for ($self->req->as_string, $self->res->as_string, "ok = " . $self->ok);
+  $ctx->release;
+}
 
 package Test2::Tools::HTTP::ResponseCompare;
 
