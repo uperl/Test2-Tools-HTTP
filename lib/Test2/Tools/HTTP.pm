@@ -18,6 +18,7 @@ our @EXPORT    = qw(
   http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
+  http_content_type http_content_type_charset
 );
 our @EXPORT_OK = (@EXPORT);
 
@@ -46,8 +47,8 @@ our @EXPORT_OK = (@EXPORT);
      # also use object {} style comparisons:
      call code => 200; 
 
-     http_content_type match qr/plain$/;
-     http_content_type_charset 'utf-8';
+     http_content_type match qr/^text\//;
+     http_content_type_charset 'UTF-8';
      http_content qr/Test/;
    }
  );
@@ -337,7 +338,28 @@ sub http_isnt_error        { _add_call('is_error',        Test2::Tools::Compare:
 sub http_isnt_client_error { _add_call('is_client_error', Test2::Tools::Compare::F()) }
 sub http_isnt_server_error { _add_call('is_server_error', Test2::Tools::Compare::F()) }
 
-# TODO: content_type, content_type_charset, content_length, content_length_ok, location
+=head3 http_content_type, http_content_type_charset
+
+ http_response {
+   http_content_type $check;
+   http_content_type_charset $check;
+ };
+
+=cut
+
+sub http_content_type
+{
+  my($check) = @_;
+  _add_call('content_type', $check);
+}
+
+sub http_content_type_charset
+{
+  my($check) = @_;
+  _add_call('content_type_charset', $check);
+}
+
+# TODO: content_length, content_length_ok, location
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
 

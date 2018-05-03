@@ -325,9 +325,9 @@ subtest 'http_response' => sub {
 
 };
 
-subtest 'basic calls code, message, content' => sub {
+subtest 'basic calls code, message, content, content_type' => sub {
 
-  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ 'some text' ] ] };
+  psgi_app_add sub { [ 200, [ 'Content-Type' => 'Text/Plain;charset=utf-8' ], [ 'some text' ] ] };
 
   http_request(
     GET('http://psgi-app.test/'),
@@ -335,6 +335,32 @@ subtest 'basic calls code, message, content' => sub {
       http_code 200;
       http_message 'OK';
       http_content 'some text';
+    },
+  );
+
+  http_request(
+    GET('http://psgi-app.test/'),
+    http_response {
+      http_content_type 'text/plain';
+      http_content_type_charset 'UTF-8';
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://psgi-app.test/'),
+        http_response {
+          http_content_type 'text/html';
+          http_content_type_charset 'private-8';
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
     },
   );
 
