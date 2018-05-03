@@ -145,7 +145,7 @@ EOM
       $req,
       object {
         call method => 'GET';
-        call uri    => '/status/200';
+        call uri    => 'https://example.test/status/200';
       },
     );
 
@@ -596,6 +596,53 @@ subtest 'json' => sub {
 
   psgi_app_del 'http://valid-json.test';
   psgi_app_del 'http://invalid-json.test';
+
+};
+
+subtest 'diagnostc with large respinse' => sub {
+
+  my $content = 'frooble';
+
+  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ $content ] ] };
+
+  http_request(
+    GET('/')
+  );
+
+  http_last->note;
+
+  is(
+    intercept {
+      http_last->note;
+    },
+    array {
+      event Note => sub {};
+      event Note => sub {
+        call message => http_last->res->as_string;
+      };
+      etc;
+    },
+  );
+
+  $content = 'whaaa?' x 1024;
+  http_request(
+    GET('/'),
+  );
+
+  http_last->note;
+
+  is(
+    intercept {
+      http_last->note;
+    },
+    array {
+      event Note => sub {};
+      event Note => sub {
+        call message => http_last->res->headers->as_string . "[large body removed]";
+      };
+      etc;
+    },
+  );
 
 };
 

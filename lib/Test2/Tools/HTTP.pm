@@ -326,12 +326,32 @@ sub req { shift->{req} }
 sub res { shift->{res} }
 sub ok  { shift->{ok}  }
 
-# TODO: truncate the response body if it is too large?
+sub _note_or_diag
+{
+  my($self, $method) = @_;
+  my $ctx = Test2::API::context();
+
+  $ctx->$method($self->req->as_string);
+
+  if(length $self->res->content > 200)
+  {
+    $ctx->$method($self->res->headers->as_string . "[large body removed]");
+  }
+  else
+  {
+    $ctx->$method($self->res->as_string);
+  }
+
+  $ctx->$method("ok = " . $self->ok);
+  
+  $ctx->release;
+}
+
 sub note
 {
   my($self) = shift;
   my $ctx = Test2::API::context();
-  $ctx->note($_) for ($self->req->as_string, $self->res->as_string, "ok = " . $self->ok);
+  $self->_note_or_diag('note');
   $ctx->release;
 }
 
@@ -339,7 +359,7 @@ sub diag
 {
   my($self) = shift;
   my $ctx = Test2::API::context();
-  $ctx->diag($_) for ($self->req->as_string, $self->res->as_string, "ok = " . $self->ok);
+  $self->_note_or_diag('diag');
   $ctx->release;
 }
 
