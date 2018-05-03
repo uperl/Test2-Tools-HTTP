@@ -14,17 +14,71 @@ use JSON::Pointer;
 use URI;
 use Carp ();
 
-our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success );
+our @EXPORT    = qw( 
+  http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success
+  http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
+  http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
+);
 our @EXPORT_OK = (@EXPORT);
 
 # ABSTRACT: Test HTTP / PSGI
 # VERSION
 
+=head1 SYNOPSIS
+
+ use Test2::V0;
+ use Test2::Tools::HTTP;
+ use HTTP::Request::Common;
+ 
+ psgi_add_app sub { [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ 'Test Document' ] ] };
+ 
+ # Internally test the app from within the .t file itself
+ http_request(
+   # if no host/port/protocol is given then
+   # the default PSGI app above is assumed
+   GET('/'),
+   http_response {
+ 
+     http_code '200';
+ 
+     # http_response {} is a subclass of object {}
+     # for HTTP::Response objects only, so you can
+     # also use object {} style comparisons:
+     call code => 200; 
+
+     http_content_type match qr/plain$/;
+     http_content_type_charset 'utf-8';
+     http_content qr/Test/;
+   }
+ );
+ 
+ # test an external website
+ http_request(
+   GET('http://httpbin.org'),
+   http_response {
+     http_is_success;
+     # JSON pointer
+     http_json '/method' => 'GET';
+   }
+ );
+ 
+ done_testing;
+
+=head1 DESCRIPTION
+
+This module provides an interface for testing websites and PSGI based apps with a L<Test2> style comparisons interface.
+
 =head1 FUNCTIONS
 
 =head2 http_request
 
+ http_request($request);
+ http_request($request, $check);
  http_request($request, $check, $message);
+
+Make a HTTP request.  If there is a client level error then it will fail immediately.  Otherwise you can use a
+C<object {}> or C<http_request> comparison check to inspect the HTTP response and ensure that it matches what you
+expect.
 
 =cut
 
@@ -94,6 +148,8 @@ sub http_request
    ... # object or http checks
  };
 
+This is a comparison check specific to HTTP::Response objects.  You may include these subchecks:
+
 =cut
 
 sub http_response (&)
@@ -104,7 +160,13 @@ sub http_response (&)
   );
 }
 
-=head2 http_code
+=head3 http_code
+
+ http_response {
+   http_code $check;
+ };
+
+The HTTP status code should match the given check.
 
 =cut
 
@@ -152,7 +214,13 @@ sub http_code ($)
   _add_call('code', $expect);
 }
 
-=head2 http_message
+=head3 http_message
+
+ http_response {
+   http_message $check;
+ };
+
+The HTTP status message ('OK' for 200, 'Not Found' for 404, etc) should match the given check.
 
 =cut
 
@@ -162,7 +230,18 @@ sub http_message ($)
   _add_call('message', $expect);
 }
 
-=head2 http_content
+=head3 http_content
+
+ http_response {
+   http_content $check;
+ };
+
+The decoded response body content.  This is the I<decoded> content, as for most application testing this is what you will be interested in.
+If you want to test the undecoded content you can use call instead:
+
+ http_response {
+   call content => $check;
+ };
 
 =cut
 
@@ -172,7 +251,15 @@ sub http_content ($)
   _add_call('decoded_content', $expect);
 }
 
-=head2 http_json
+=head3 http_json
+
+ http_response {
+   http_json $json_pointer, $check;
+   http_json $check;
+ };
+
+This matches the value at the given JSON pointer with the given check.  If C<$json_pointer> is omitted, then the comparison is made against the
+whole JSON response.
 
 =cut
 
@@ -206,22 +293,96 @@ sub http_json
   );
 }
 
-=head2 http_is_success
+=head3 http_is_info, http_is_success, http_is_redirect, http_is_error, http_is_client_error, http_is_server_error
+
+ http_response {
+   http_is_info;
+   http_is_success;
+   http_is_redirect;
+   http_is_error;
+   http_is_client_error;
+   http_is_server_error;
+ };
+
+Checks that the response is of the specified type.  See L<HTTP::Status> for the meaning of each of these.
 
 =cut
 
-sub http_is_success
-{
-  my($expect) = @_;
-  _add_call('is_success', Test2::Tools::Compare::T());
-}
+sub http_is_info         { _add_call('is_info',         Test2::Tools::Compare::T()) }
+sub http_is_success      { _add_call('is_success',      Test2::Tools::Compare::T()) }
+sub http_is_redirect     { _add_call('is_redirect',     Test2::Tools::Compare::T()) }
+sub http_is_error        { _add_call('is_error',        Test2::Tools::Compare::T()) }
+sub http_is_client_error { _add_call('is_client_error', Test2::Tools::Compare::T()) }
+sub http_is_server_error { _add_call('is_server_error', Test2::Tools::Compare::T()) }
 
-# TODO: is_info, is_success, is_redirect, is_error is_client_error is_server_error
+=head3 http_isnt_info, http_isnt_success, http_isnt_redirect, http_isnt_error, http_isnt_client_error, http_isnt_server_error
+
+ http_response {
+   http_isnt_info;
+   http_isnt_success;
+   http_isnt_redirect;
+   http_isnt_error;
+   http_isnt_client_error;
+   http_isnt_server_error;
+ };
+
+Checks that the response is NOT of the specified type.  See L<HTTP::Status> for the meaning of each of these.
+
+=cut
+
+sub http_isnt_info         { _add_call('is_info',         Test2::Tools::Compare::F()) }
+sub http_isnt_success      { _add_call('is_success',      Test2::Tools::Compare::F()) }
+sub http_isnt_redirect     { _add_call('is_redirect',     Test2::Tools::Compare::F()) }
+sub http_isnt_error        { _add_call('is_error',        Test2::Tools::Compare::F()) }
+sub http_isnt_client_error { _add_call('is_client_error', Test2::Tools::Compare::F()) }
+sub http_isnt_server_error { _add_call('is_server_error', Test2::Tools::Compare::F()) }
+
 # TODO: content_type, content_type_charset, content_length, content_length_ok, location
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
 
 =head2 http_last
+
+ my $req  = http_last->req;
+ my $res  = http_last->res;
+ my $bool = http_last->ok;
+ my $bool = http_last->connection_error;
+ http_last->note;
+ http_last->diag;
+
+This returns the last transaction object, which you can use to get the last request, response and status information
+related to the last C<http_request>.
+
+=over 4
+
+=item http_last->req
+
+The L<HTTP::Request> object.
+
+=item http_last->res
+
+The L<HTTP::Response> object.
+
+Warning: In the case of a connection error, this may be a synthetic response produced by L<LWP::UserAgent>, rather
+than an actual message from the remote end.
+
+=item http_last->ok
+
+True if the last call to C<http_request> passed.
+
+=item http_last->connection_error.
+
+True if there was a connection error during the last C<http_request>.
+
+=item http_last->note
+
+Send the request, response and ok to Test2's "note" output.
+
+=item http_last->diag
+
+Send the request, response and ok to Test2's "diag" output.
+
+=back
 
 =cut
 
@@ -234,6 +395,16 @@ sub http_last
 
  http_base_url($url);
  my $url = http_base_url;
+
+Sets the base URL for all requests made by C<http_request>.  This is used if you do not provide a fully qualified URL.  For example:
+
+ http_base_url 'http://httpbin.org';
+ http_request(
+   GET('/status/200') # actually makes a request against http://httpbin.org
+ );
+
+If you use C<psgi_add_app> without a URL, then this is the URL which will be used to access your app.  If you do not specify a base URL,
+then localhost with a random unused port will be picked.
 
 =cut
 
@@ -263,6 +434,9 @@ sub http_base_url
  http_ua(LWP::UserAgent->new);
  my $ua = http_ua;
 
+Gets/sets the L<LWP::UserAgent> object used to make requests against real web servers.  For tests against a PSGI app, this will NOT be used.
+If not provided, the default L<LWP::UserAgent> will call C<env_proxy> and add an in-memory cookie jar.
+
 =cut
 
 my $ua;
@@ -288,6 +462,9 @@ sub http_ua
  psgi_app_add $app;
  psgi_app_add $url, $app;
 
+Add the given PSGI app to the testing environment.  If you provide a URL, then requests to that URL will be intercepted by C<http_request> and routed to the app
+instead of making a real HTTP request via L<LWP::UserAgent>.
+
 =cut
 
 sub _uri_key
@@ -310,6 +487,8 @@ sub psgi_app_add
 
  psgi_app_del;
  psgi_app_del $url;
+
+Remove the app at the given (or default) URL.
 
 =cut
 
@@ -430,3 +609,16 @@ sub deltas
 }
 
 1;
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Test::Mojo>
+
+This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a L<Mojolicious> app since it can be used
+(with L<Test::Mojo::Role::PSGI>) to test any PSGI application.
+
+=back
+
+=cut
