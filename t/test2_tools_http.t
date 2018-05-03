@@ -4,6 +4,7 @@ use Test2::Mock;
 use HTTP::Request;
 use HTTP::Request::Common;
 use Test2::Tools::URL;
+use JSON::MaybeXS qw( encode_json );
 
 subtest 'ua' => sub {
 
@@ -392,6 +393,187 @@ subtest 'basic calls code, message, content' => sub {
   like $@, qr/'http_code' should only ever be called in void contex/;
 
   psgi_app_del;
+
+};
+
+subtest 'json' => sub {
+
+  psgi_app_add 'http://valid-json.test' => sub { 
+    [ 200, [ 'Content-Type' => 'application/json' ], [ 
+      encode_json ({ a => 'b', c => [1,3,4], d => { roger => 'rabbit' }, na => undef }) 
+    ] ]
+  };
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json { a => 'b', c => [1,3,4], d => { roger => 'rabbit' }, na => undef };
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+    'http_json with default (root) jsoin pointer pass',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json { a => 'b', c => [1,10,4], d => { roger => 'rabbit' }, na => undef };
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+    'http_json with default (root) jsoin pointer fail',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/c' => [1,3,4];
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+    'http_json with pointer to array pass',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/c' => [1,10,4];
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+    'http_json with pointer to array fail',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/na' => E();
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+    'http_json with pointer undef if exists pass',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/na2' => E();
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+    'http_json with pointer na if exists fail',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/na' => DNE();
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+    'http_json with pointer undef if not exists fail',
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://valid-json.test'),
+        http_response {
+          http_json '/na2' => DNE();
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+    'http_json with pointer na if not exists pass',
+  );
+
+  psgi_app_add 'http://invalid-json.test' => sub { 
+    [ 200, [ 'Content-Type' => 'application/json' ], [ 
+      '{"foo":"bar"',
+    ] ]
+  };
+
+  is(
+    intercept {
+      http_request(
+        GET('http://invalid-json.test'),
+        http_response {
+          http_json '/anything', 'else';
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+    'http_json fails with invalid JSON',
+  );
+
+  psgi_app_del 'http://valid-json.test';
+  psgi_app_del 'http://invalid-json.test';
 
 };
 

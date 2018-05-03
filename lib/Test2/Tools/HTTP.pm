@@ -6,11 +6,14 @@ use 5.008001;
 use LWP::UserAgent;
 use parent qw( Exporter );
 use Test2::API qw( context );
-use Test2::Compare ();
+use Test2::Compare;
+use Test2::Compare::Wildcard;
+use JSON::MaybeXS qw( decode_json );
+use JSON::Pointer;
 use URI;
 use Carp ();
 
-our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content );
+our @EXPORT    = qw( http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json );
 our @EXPORT_OK = (@EXPORT);
 
 # ABSTRACT: Test HTTP / PSGI
@@ -154,6 +157,40 @@ sub http_content ($)
   _add_call('decoded_content', $expect);
 }
 
+=head2 http_json
+
+=cut
+
+sub http_json
+{
+  my($pointer, $expect) = @_ == 1 ? ('', $_[0]) : (@_);
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      
+      my $object = eval {
+        decode_json($res->decoded_content)
+      };
+      if(my $error = $@)
+      {
+        # this is terrible!
+        $error =~ s/ at \S+ line [0-9]+\.//;
+        die "error decoding JSON: $error\n";
+      }
+      (
+        JSON::Pointer->get($object, $pointer),
+        JSON::Pointer->contains($object, $pointer),
+      )
+    },
+    [DEREF => $pointer eq '' ? 'json' : "json $pointer"],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),
+  );
+}
+
 =head2 http_base_url
 
  http_base_url($url);
@@ -257,5 +294,61 @@ use parent 'Test2::Compare::Object';
 
 sub name { '<HTTP::Response>' }
 sub object_base { 'HTTP::Response' }
+
+sub init
+{
+  my($self) = @_;
+  $self->{HTTP_CHECK} ||= [];
+  $self->SUPER::init();
+}
+
+sub add_http_check
+{
+  my($self, $cb, $id, $expect) = @_;
+
+  push @{ $self->{HTTP_CHECK} }, [ $cb, $id, $expect ];
+}
+
+sub deltas
+{
+  my $self = shift;
+  my @deltas = $self->SUPER::deltas(@_);
+  my %params = @_;
+
+  my ($got, $convert, $seen) = @params{qw/got convert seen/};
+
+  foreach my $pair (@{ $self->{HTTP_CHECK} })
+  {
+    my($cb, $id, $check) = @$pair;
+
+    $check = $convert->($check);
+
+    my($val, $exists) = eval { $cb->($got) };
+    my $error = $@;
+
+    if($error)
+    {
+      push @deltas => $self->delta_class->new(
+        verified  => undef,
+        id        => $id,
+        got       => undef,
+        check     => $check,
+        exception => $error,
+      );
+    }
+    else
+    {
+      push @deltas => $check->run(
+        id      => $id,
+        convert => $convert,
+        seen    => $seen,
+        exists  => $exists,
+        $exists ? ( got => $val) : (),
+      );
+    }
+  }
+
+  @deltas;
+}
 
 1;
