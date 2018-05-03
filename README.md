@@ -20,6 +20,12 @@ Test HTTP / PSGI
 
 ## http\_content
 
+## http\_json
+
+## http\_is\_success
+
+## http\_last
+
 ## http\_base\_url
 
     http_base_url($url);

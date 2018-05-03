@@ -10,16 +10,23 @@ my %modules;
 my $post_diag;
 
 $modules{$_} = $_ for qw(
+  Cpanel::JSON::XS
   ExtUtils::MakeMaker
   HTTP::Request
   HTTP::Request::Common
+  JSON::MaybeXS
+  JSON::PP
+  JSON::Pointer
+  JSON::XS
   LWP::UserAgent
   Plack
   Test2::API
   Test2::Compare
   Test2::Compare::Object
+  Test2::Compare::Wildcard
   Test2::Mock
   Test2::Require
+  Test2::Tools::Compare
   Test2::Tools::URL
   Test2::V0
   URI
