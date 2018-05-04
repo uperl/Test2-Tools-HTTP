@@ -674,4 +674,124 @@ subtest 'diagnostc with large respinse' => sub {
 
 };
 
+subtest 'location, location_url' => sub {
+
+  psgi_app_add 'http://with-forward.test' => sub { [ 301, [ 'Location' => '/foo/bar/baz', 'Content-Type' => 'text/plain' ], [ '' ] ] };
+  psgi_app_add 'http://without-forward.test' => sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ '' ] ] };
+
+  is(
+    intercept {
+      http_request(
+        GET('http://with-forward.test'),
+        http_response {
+          http_location '/foo/bar/baz';
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://with-forward.test'),
+        http_response {
+          http_location '/different';
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://without-forward.test'),
+        http_response {
+          http_location '/foo/bar/baz';
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://with-forward.test'),
+        http_response {
+          http_location_uri url {
+            url_component scheme => 'http';
+            url_component host   => 'with-forward.test';
+            url_component port   => 80;
+            url_component path   => '/foo/bar/baz';
+          };
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => T();
+      };
+      end;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://with-forward.test'),
+        http_response {
+          http_location_uri url {
+            url_component scheme => 'https';
+            url_component path   => '/foo/xbar/baz';
+          };
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      http_request(
+        GET('http://without-forward.test'),
+        http_response {
+          http_location_uri url {}
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  psgi_app_del 'http://with-forward.test';
+  psgi_app_del 'http://without-forward.test';
+
+};
+
 done_testing

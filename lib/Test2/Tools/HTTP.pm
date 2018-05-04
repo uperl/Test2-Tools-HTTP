@@ -18,7 +18,7 @@ our @EXPORT    = qw(
   http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
-  http_content_type http_content_type_charset http_content_length http_content_length_ok
+  http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
 );
 our @EXPORT_OK = (@EXPORT);
 
@@ -367,7 +367,6 @@ sub http_content_type_charset
   _add_call('content_type_charset', $check);
 }
 
-# TODO: location, location_url
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
 
@@ -419,6 +418,59 @@ sub http_content_length_ok
   );
 
 
+}
+
+=head3 http_location, http_location_uri
+
+ http_response {
+   http_location $check;
+   http_location_uri $check;
+ };
+
+Check the C<Location> HTTP header.  The C<http_location_uri> variant converts C<Location> to a L<URI> using the base URL of the response
+so that it can be tested with L<Test2::Tools::URL>.
+
+=cut
+
+sub http_location
+{
+  my($expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      my $location = $res->header('Location');
+      (
+        $location,
+        defined $location
+      )
+    },
+    [DEREF => "header('Location')"],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),    
+  );
+}
+
+sub http_location_uri
+{
+  my($expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      my $location = $res->header('Location');
+      defined $location
+        ? (URI->new_abs($location, $res->base), 1)
+        : (undef, 0);
+    },
+    [DEREF => "header('Location')"],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),    
+  );
 }
 
 =head2 http_last

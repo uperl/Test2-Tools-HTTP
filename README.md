@@ -162,6 +162,16 @@ Check that the `Content-Length` header matches the given check.
 
 Checks that the `Content-Length` header matches the actual length of the content.
 
+### http\_location, http\_location\_uri
+
+    http_response {
+      http_location $check;
+      http_location_uri $check;
+    };
+
+Check the `Location` HTTP header.  The `http_location_uri` variant converts `Location` to a [URI](https://metacpan.org/pod/URI) using the base URL of the response
+so that it can be tested with [Test2::Tools::URL](https://metacpan.org/pod/Test2::Tools::URL).
+
 ## http\_last
 
     my $req  = http_last->req;
