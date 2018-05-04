@@ -83,6 +83,9 @@ is(
 
 is($ret, F(), 'returns false');
 
+use Test2::Todo;
+my $todo = Test2::Todo->new(reason => 'need a rethink');
+
 is(
   intercept {
     http_last->note;
@@ -121,6 +124,8 @@ is(
   'http_last->diag on fail',
 );
 
+$todo->end;
+
 http_request(
   GET('/cookies'),
   http_response {
@@ -158,5 +163,71 @@ http_request(
     http_json '/cookies' => {};
   },
 );
+
+note "decodable = $_" for HTTP::Message::decodable();
+
+subtest 'gzip' => sub {
+
+  skip_all 'test requires gzip decoding' unless grep /gzip/, HTTP::Message::decodable;
+
+  http_request(
+    GET('/gzip'),
+    http_response {
+      http_json '/gzipped' => T();
+    },
+  );
+
+  my $decoded_content_length = length http_last->res->decoded_content;
+  my $undecoded_content_length = length http_last->res->content;
+
+  note "decoded   = ", $decoded_content_length;
+  note "undecoded = ", $undecoded_content_length;
+
+  is(
+    http_last->res,
+    http_response {
+      http_content_length $undecoded_content_length;
+      http_content_length_ok;
+    }
+  );
+
+  my $res = http_last->res->clone;
+  $res->content($res->content . "  ");
+
+  is(
+    intercept {
+      is(
+        $res,
+        http_response {
+          http_content_length $undecoded_content_length-2;
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      is(
+        $res,,
+        http_response {
+          http_content_length_ok;
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+};
 
 done_testing

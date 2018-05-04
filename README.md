@@ -24,8 +24,8 @@ Test HTTP / PSGI
         # also use object {} style comparisons:
         call code => 200; 
 
-        http_content_type match qr/plain$/;
-        http_content_type_charset 'utf-8';
+        http_content_type match qr/^text\//;
+        http_content_type_charset 'UTF-8';
         http_content qr/Test/;
       }
     );
@@ -130,6 +130,37 @@ Checks that the response is of the specified type.  See [HTTP::Status](https://m
     };
 
 Checks that the response is NOT of the specified type.  See [HTTP::Status](https://metacpan.org/pod/HTTP::Status) for the meaning of each of these.
+
+### http\_content\_type, http\_content\_type\_charset
+
+    http_response {
+      http_content_type $check;
+      http_content_type_charset $check;
+    };
+
+Check that the `Content-Type` header matches the given checks.  `http_content_type` checks just the content type, not the character set, and
+`http_content_type_charset` matches just the character set.  Hence:
+
+    http_response {
+      http_content_type 'text/html';
+      http_content_type_charset 'UTF-8';
+    };
+
+### http\_content\_length
+
+    http_response {
+      http_content_length $check;
+    };
+
+Check that the `Content-Length` header matches the given check.
+
+### http\_content\_length\_ok
+
+    http_response {
+      http_content_length_ok;
+    };
+
+Checks that the `Content-Length` header matches the actual length of the content.
 
 ## http\_last
 

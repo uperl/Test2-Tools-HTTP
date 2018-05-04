@@ -18,7 +18,7 @@ our @EXPORT    = qw(
   http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
-  http_content_type http_content_type_charset
+  http_content_type http_content_type_charset http_content_length http_content_length_ok
 );
 our @EXPORT_OK = (@EXPORT);
 
@@ -345,6 +345,14 @@ sub http_isnt_server_error { _add_call('is_server_error', Test2::Tools::Compare:
    http_content_type_charset $check;
  };
 
+Check that the C<Content-Type> header matches the given checks.  C<http_content_type> checks just the content type, not the character set, and
+C<http_content_type_charset> matches just the character set.  Hence:
+
+ http_response {
+   http_content_type 'text/html';
+   http_content_type_charset 'UTF-8';
+ };
+
 =cut
 
 sub http_content_type
@@ -362,6 +370,56 @@ sub http_content_type_charset
 # TODO: content_length, content_length_ok, location
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
+
+=head3 http_content_length
+
+ http_response {
+   http_content_length $check;
+ };
+
+Check that the C<Content-Length> header matches the given check.
+
+=cut
+
+sub http_content_length
+{
+  my($check) = @_;
+  _add_call('content_length', $check);
+}
+
+=head3 http_content_length_ok
+
+ http_response {
+   http_content_length_ok;
+ };
+
+Checks that the C<Content-Length> header matches the actual length of the content.
+
+=cut
+
+sub http_content_length_ok
+{
+  my($build, @cmpargs) = _build;
+
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+
+      (
+        $res->content_length,
+        1,
+        Test2::Compare::Wildcard->new(
+          expect => length($res->content),
+          @cmpargs,
+        ),
+      )
+    },
+    [METHOD => 'content_length'],
+    undef,
+  );
+
+
+}
 
 =head2 http_last
 
@@ -600,10 +658,12 @@ sub deltas
   {
     my($cb, $id, $check) = @$pair;
 
-    $check = $convert->($check);
-
-    my($val, $exists) = eval { $cb->($got) };
+    my($val, $exists, $alt_check) = eval { $cb->($got) };
     my $error = $@;
+
+    $check = $alt_check if defined $alt_check;
+
+    $check = $convert->($check);
 
     if($error)
     {
