@@ -367,7 +367,7 @@ sub http_content_type_charset
   _add_call('content_type_charset', $check);
 }
 
-# TODO: content_length, content_length_ok, location
+# TODO: location, location_url
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
 
