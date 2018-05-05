@@ -55,11 +55,11 @@ our @EXPORT_OK = (@EXPORT);
  
  # test an external website
  http_request(
-   GET('http://httpbin.org'),
+   GET('http://example.test'),
    http_response {
      http_is_success;
-     # JSON pointer
-     http_json '/method' => 'GET';
+     # JSON pointer { "key":"val" }
+     http_json '/key' => 'val';
    }
  );
  
@@ -171,12 +171,8 @@ The HTTP status code should match the given check.
 
 =cut
 
-sub _build
+sub _caller
 {
-  defined(my $build = Test2::Compare::get_build()) or Carp::croak "No current build!";
-  Carp::croak "'$build' is not a Test2::Tools::HTTP::ResponseCompare"
-    unless $build->isa('Test2::Tools::HTTP::ResponseCompare');
-
   my $i = 1;
   my @caller;
   while(@caller = caller $i)
@@ -184,6 +180,16 @@ sub _build
     last if $caller[0] ne __PACKAGE__;
     $i++;
   }
+  @caller;
+}
+
+sub _build
+{
+  defined(my $build = Test2::Compare::get_build()) or Carp::croak "No current build!";
+  Carp::croak "'$build' is not a Test2::Tools::HTTP::ResponseCompare"
+    unless $build->isa('Test2::Tools::HTTP::ResponseCompare');
+
+  my @caller = _caller;
 
   my $func_name = $caller[3];
   $func_name =~ s/^.*:://;
@@ -309,12 +315,22 @@ Checks that the response is of the specified type.  See L<HTTP::Status> for the 
 
 =cut
 
-sub http_is_info         { _add_call('is_info',         Test2::Tools::Compare::T()) }
-sub http_is_success      { _add_call('is_success',      Test2::Tools::Compare::T()) }
-sub http_is_redirect     { _add_call('is_redirect',     Test2::Tools::Compare::T()) }
-sub http_is_error        { _add_call('is_error',        Test2::Tools::Compare::T()) }
-sub http_is_client_error { _add_call('is_client_error', Test2::Tools::Compare::T()) }
-sub http_is_server_error { _add_call('is_server_error', Test2::Tools::Compare::T()) }
+sub _T()
+{
+  my @caller = _caller;
+  Test2::Compare::Custom->new(
+    code => sub { $_ ? 1 : 0 }, name => 'TRUE', operator => 'TRUE()',
+    file => $caller[1],
+    lines => [$caller[2]],
+  );
+}
+
+sub http_is_info         { _add_call('is_info',         _T()) }
+sub http_is_success      { _add_call('is_success',      _T()) }
+sub http_is_redirect     { _add_call('is_redirect',     _T()) }
+sub http_is_error        { _add_call('is_error',        _T()) }
+sub http_is_client_error { _add_call('is_client_error', _T()) }
+sub http_is_server_error { _add_call('is_server_error', _T()) }
 
 =head3 http_isnt_info, http_isnt_success, http_isnt_redirect, http_isnt_error, http_isnt_client_error, http_isnt_server_error
 
@@ -331,12 +347,22 @@ Checks that the response is NOT of the specified type.  See L<HTTP::Status> for 
 
 =cut
 
-sub http_isnt_info         { _add_call('is_info',         Test2::Tools::Compare::F()) }
-sub http_isnt_success      { _add_call('is_success',      Test2::Tools::Compare::F()) }
-sub http_isnt_redirect     { _add_call('is_redirect',     Test2::Tools::Compare::F()) }
-sub http_isnt_error        { _add_call('is_error',        Test2::Tools::Compare::F()) }
-sub http_isnt_client_error { _add_call('is_client_error', Test2::Tools::Compare::F()) }
-sub http_isnt_server_error { _add_call('is_server_error', Test2::Tools::Compare::F()) }
+sub _F()
+{
+  my @caller = _caller;
+  Test2::Compare::Custom->new(
+    code => sub { $_ ? 0 : 1 }, name => 'TRUE', operator => 'TRUE()',
+    file => $caller[1],
+    lines => [$caller[2]],
+  );
+}
+
+sub http_isnt_info         { _add_call('is_info',         _F()) }
+sub http_isnt_success      { _add_call('is_success',      _F()) }
+sub http_isnt_redirect     { _add_call('is_redirect',     _F()) }
+sub http_isnt_error        { _add_call('is_error',        _F()) }
+sub http_isnt_client_error { _add_call('is_client_error', _F()) }
+sub http_isnt_server_error { _add_call('is_server_error', _F()) }
 
 =head3 http_content_type, http_content_type_charset
 
