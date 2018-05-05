@@ -8,7 +8,7 @@ use parent qw( Exporter );
 use Test2::API qw( context );
 use Test2::Compare;
 use Test2::Compare::Wildcard;
-use Test2::Tools::Compare ();
+use Test2::Compare::Custom;
 use JSON::MaybeXS qw( decode_json );
 use JSON::Pointer;
 use URI;
@@ -47,7 +47,7 @@ our @EXPORT_OK = (@EXPORT);
      # also use object {} style comparisons:
      call code => 200; 
 
-     http_content_type match qr/^text\//;
+     http_content_type match qr/^text\/(html|plain)$/;
      http_content_type_charset 'UTF-8';
      http_content qr/Test/;
    }
