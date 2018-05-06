@@ -319,9 +319,11 @@ sub _T()
 {
   my @caller = _caller;
   Test2::Compare::Custom->new(
-    code => sub { $_ ? 1 : 0 }, name => 'TRUE', operator => 'TRUE()',
-    file => $caller[1],
-    lines => [$caller[2]],
+    code     => sub { $_ ? 1 : 0 },
+    name     => 'TRUE',
+    operator => 'TRUE()',
+    file     => $caller[1],
+    lines    => [$caller[2]],
   );
 }
 
@@ -351,9 +353,11 @@ sub _F()
 {
   my @caller = _caller;
   Test2::Compare::Custom->new(
-    code => sub { $_ ? 0 : 1 }, name => 'TRUE', operator => 'TRUE()',
-    file => $caller[1],
-    lines => [$caller[2]],
+    code     => sub { $_ ? 0 : 1 },
+    name     => 'TRUE',
+    operator => 'TRUE()',
+    file     => $caller[1],
+    lines    => [$caller[2]],
   );
 }
 
