@@ -2,12 +2,12 @@ use Test2::Require::Module 'Test2::Tools::JSON::Pointer';
 use Test2::V0 -no_srand => 1;
 use Test2::Tools::HTTP;
 use Test2::Tools::JSON::Pointer;
-use Test2::Require::Internet -tcp => [ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org', $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 'http' ];
+use Test2::Require::Internet -tcp => [ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org', $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 80 ];
 use HTTP::Request::Common;
 
 my $ret;
 
-http_base_url "http://@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org' ]}:@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 'http' ]}";
+http_base_url "http://@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org' ]}:@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 80 ]}";
 
 is(
   intercept {
@@ -33,10 +33,16 @@ is(
   },
   array {
     event Note => sub {
+      call message => match qr/^GET /;
+    };
+    event Note => sub {
       call message => http_last->req->headers->as_string;
     };
     event Note => sub {
       call message => http_last->req->decoded_content || http_last->req->decoded_content;
+    };
+    event Note => sub {
+      call message => '200 OK';
     };
     event Note => sub {
       call message => http_last->res->headers->as_string;
@@ -58,10 +64,16 @@ is(
   },
   array {
     event Diag => sub {
+      call message => match qr/^GET /;
+    };
+    event Diag => sub {
       call message => http_last->req->headers->as_string;
     };
     event Diag => sub {
       call message => http_last->req->decoded_content || http_last->req->decoded_content;
+    };
+    event Diag => sub {
+      call message => '200 OK';
     };
     event Diag => sub {
       call message => http_last->res->headers->as_string;
@@ -103,10 +115,16 @@ is(
   },
   array {
     event Note => sub {
+      call message => match qr/^GET /;
+    };
+    event Note => sub {
       call message => http_last->req->headers->as_string;
     };
     event Note => sub {
       call message => http_last->req->decoded_content || http_last->req->content
+    };
+    event Note => sub {
+      call message => match qr/^500 /;
     };
     event Note => sub {
       call message => http_last->res->headers->as_string;
@@ -128,10 +146,16 @@ is(
   },
   array {
     event Diag => sub {
+      call message => match qr/^GET /;
+    };
+    event Diag => sub {
       call message => http_last->req->headers->as_string;
     };
     event Diag => sub {
       call message => http_last->req->decoded_content || http_last->req->content
+    };
+    event Diag => sub {
+      call message => match qr/^500 /;
     };
     event Diag => sub {
       call message => http_last->res->headers->as_string;
