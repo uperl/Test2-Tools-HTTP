@@ -96,9 +96,6 @@ is(
 
 is($ret, F(), 'returns false');
 
-use Test2::Todo;
-my $todo = Test2::Todo->new(reason => 'need a rethink');
-
 is(
   intercept {
     http_last->note;
@@ -149,8 +146,6 @@ is(
   'http_last->diag on fail',
 );
 
-$todo->end;
-
 http_request(
   GET('/cookies'),
   http_response {
@@ -198,7 +193,7 @@ subtest 'gzip' => sub {
   http_request(
     GET('/gzip'),
     http_response {
-      http_json '/gzipped' => T();
+      http_content json '/gzipped' => T();
     },
   );
 
