@@ -90,11 +90,13 @@ The HTTP status message ('OK' for 200, 'Not Found' for 404, etc) should match th
       http_content $check;
     };
 
-The decoded response body content.  This is the _decoded_ content, as for most application testing this is what you will be interested in.
-If you want to test the undecoded content you can use call instead:
+The response body content.  Attempt to decode using the [HTTP::Message](https://metacpan.org/pod/HTTP::Message) method `decoded_content`, otherwise use the raw
+response body.  If you want specifically the decoded content or the raw content you can use `call` to specifically check
+against them:
 
     http_response {
-      call content => $check;
+      call content => $check1;
+      call decoded_content => $check2;
     };
 
 ### http\_is\_info, http\_is\_success, http\_is\_redirect, http\_is\_error, http\_is\_client\_error, http\_is\_server\_error
@@ -197,11 +199,13 @@ related to the last `http_request`.
 
 - http\_last->note
 
-    Send the request, response and ok to Test2's "note" output.
+    Send the request, response and ok to Test2's "note" output.  Note that the message bodies may be decoded, but
+    the headers will not be modified.
 
 - http\_last->diag
 
-    Send the request, response and ok to Test2's "diag" output.
+    Send the request, response and ok to Test2's "diag" output.  Note that the message bodies may be decoded, but
+    the headers will not be modified.
 
 ## http\_base\_url
 

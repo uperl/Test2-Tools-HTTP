@@ -1,12 +1,12 @@
 use Test2::V0 -no_srand => 1;
 use Test2::Tools::HTTP;
 use Test2::Tools::JSON::Pointer;
-use Test2::Require::Internet -tcp => [ 'httpbin.org', 'http' ];
+use Test2::Require::Internet -tcp => [ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org', $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 'http' ];
 use HTTP::Request::Common;
 
 my $ret;
 
-http_base_url 'http://httpbin.org';
+http_base_url "http://@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org' ]}:@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 'http' ]}";
 
 is(
   intercept {
@@ -17,7 +17,7 @@ is(
   array {
     event Ok => sub {
       call pass => T();
-      call name => 'GET http://httpbin.org/status/200';
+      call name => match qr{/status/200$};
     };
     end;
   },
@@ -32,10 +32,16 @@ is(
   },
   array {
     event Note => sub {
-      call message => http_last->req->as_string;
+      call message => http_last->req->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->res->as_string;
+      call message => http_last->req->decoded_content || http_last->req->decoded_content;
+    };
+    event Note => sub {
+      call message => http_last->res->headers->as_string;
+    };
+    event Note => sub {
+      call message => http_last->res->decoded_content || http_last->res->decoded_content;
     };
     event Note => sub {
       call message => "ok = 1";
@@ -51,10 +57,16 @@ is(
   },
   array {
     event Diag => sub {
-      call message => http_last->req->as_string;
+      call message => http_last->req->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->res->as_string;
+      call message => http_last->req->decoded_content || http_last->req->decoded_content;
+    };
+    event Diag => sub {
+      call message => http_last->res->headers->as_string;
+    };
+    event Diag => sub {
+      call message => http_last->res->decoded_content || http_last->res->decoded_content;
     };
     event Diag => sub {
       call message => "ok = 1";
@@ -73,7 +85,7 @@ is(
   array {
     event Ok => sub {
       call pass => F();
-      call name => 'GET http://bogus.httpbin.org/status/200';
+      call name => match qr{/status/200$};
     };
     event Diag => sub { };
     event Diag => sub { call message => match qr/connection error: /; };
@@ -93,10 +105,16 @@ is(
   },
   array {
     event Note => sub {
-      call message => http_last->req->as_string;
+      call message => http_last->req->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->res->as_string;
+      call message => http_last->req->decoded_content || http_last->req->content
+    };
+    event Note => sub {
+      call message => http_last->res->headers->as_string;
+    };
+    event Note => sub {
+      call message => http_last->res->decoded_content || http_last->res->content
     };
     event Note => sub {
       call message => "ok = 0";
@@ -112,10 +130,16 @@ is(
   },
   array {
     event Diag => sub {
-      call message => http_last->req->as_string;
+      call message => http_last->req->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->res->as_string;
+      call message => http_last->req->decoded_content || http_last->req->content
+    };
+    event Diag => sub {
+      call message => http_last->res->headers->as_string;
+    };
+    event Diag => sub {
+      call message => http_last->res->decoded_content || http_last->res->content
     };
     event Diag => sub {
       call message => "ok = 0";

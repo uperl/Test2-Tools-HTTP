@@ -510,11 +510,13 @@ True if there was a connection error during the last C<http_request>.
 
 =item http_last->note
 
-Send the request, response and ok to Test2's "note" output.
+Send the request, response and ok to Test2's "note" output.  Note that the message bodies may be decoded, but
+the headers will not be modified.
 
 =item http_last->diag
 
-Send the request, response and ok to Test2's "diag" output.
+Send the request, response and ok to Test2's "diag" output.  Note that the message bodies may be decoded, but
+the headers will not be modified.
 
 =back
 
@@ -647,17 +649,10 @@ sub _note_or_diag
   my($self, $method) = @_;
   my $ctx = Test2::API::context();
 
-  $ctx->$method($self->req->as_string);
-
-  if(length $self->res->content > 200)
-  {
-    $ctx->$method($self->res->headers->as_string . "[large body removed]");
-  }
-  else
-  {
-    $ctx->$method($self->res->as_string);
-  }
-
+  $ctx->$method($self->req->headers->as_string);
+  $ctx->$method($self->req->decoded_content || $self->req->content);
+  $ctx->$method($self->res->headers->as_string);
+  $ctx->$method($self->res->decoded_content || $self->res->content);
   $ctx->$method("ok = " . $self->ok);
   
   $ctx->release;

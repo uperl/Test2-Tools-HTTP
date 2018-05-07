@@ -445,53 +445,6 @@ subtest 'basic calls code, message, content, content_type' => sub {
 
 };
 
-subtest 'diagnostc with large respinse' => sub {
-
-  my $content = 'frooble';
-
-  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ $content ] ] };
-
-  http_request(
-    GET('/')
-  );
-
-  http_last->note;
-
-  is(
-    intercept {
-      http_last->note;
-    },
-    array {
-      event Note => sub {};
-      event Note => sub {
-        call message => http_last->res->as_string;
-      };
-      etc;
-    },
-  );
-
-  $content = 'whaaa?' x 1024;
-  http_request(
-    GET('/'),
-  );
-
-  http_last->note;
-
-  is(
-    intercept {
-      http_last->note;
-    },
-    array {
-      event Note => sub {};
-      event Note => sub {
-        call message => http_last->res->headers->as_string . "[large body removed]";
-      };
-      etc;
-    },
-  );
-
-};
-
 subtest 'location, location_url' => sub {
 
   psgi_app_add 'http://with-forward.test' => sub { [ 301, [ 'Location' => '/foo/bar/baz', 'Content-Type' => 'text/plain' ], [ '' ] ] };
