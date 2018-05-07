@@ -24,19 +24,21 @@ Test HTTP / PSGI
         # also use object {} style comparisons:
         call code => 200; 
 
-        http_content_type match qr/^text\//;
+        http_content_type match qr/^text\/(html|plain)$/;
         http_content_type_charset 'UTF-8';
         http_content qr/Test/;
       }
     );
+
+    use Test2::Tools::JSON::Pointer;
     
     # test an external website
     http_request(
-      GET('http://httpbin.org'),
+      GET('http://example.test'),
       http_response {
         http_is_success;
-        # JSON pointer
-        http_json '/method' => 'GET';
+        # JSON pointer { "key":"val" }
+        http_content json '/key' => 'val';
       }
     );
     
@@ -94,16 +96,6 @@ If you want to test the undecoded content you can use call instead:
     http_response {
       call content => $check;
     };
-
-### http\_json
-
-    http_response {
-      http_json $json_pointer, $check;
-      http_json $check;
-    };
-
-This matches the value at the given JSON pointer with the given check.  If `$json_pointer` is omitted, then the comparison is made against the
-whole JSON response.
 
 ### http\_is\_info, http\_is\_success, http\_is\_redirect, http\_is\_error, http\_is\_client\_error, http\_is\_server\_error
 

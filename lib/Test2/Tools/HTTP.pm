@@ -9,13 +9,11 @@ use Test2::API qw( context );
 use Test2::Compare;
 use Test2::Compare::Wildcard;
 use Test2::Compare::Custom;
-use JSON::MaybeXS qw( decode_json );
-use JSON::Pointer;
 use URI;
 use Carp ();
 
 our @EXPORT    = qw( 
-  http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_json http_last http_is_success
+  http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_last http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
@@ -52,6 +50,8 @@ our @EXPORT_OK = (@EXPORT);
      http_content qr/Test/;
    }
  );
+
+ use Test2::Tools::JSON::Pointer;
  
  # test an external website
  http_request(
@@ -59,7 +59,7 @@ our @EXPORT_OK = (@EXPORT);
    http_response {
      http_is_success;
      # JSON pointer { "key":"val" }
-     http_json '/key' => 'val';
+     http_content json '/key' => 'val';
    }
  );
  
@@ -256,48 +256,6 @@ sub http_content ($)
 {
   my($expect) = @_;
   _add_call('decoded_content', $expect);
-}
-
-=head3 http_json
-
- http_response {
-   http_json $json_pointer, $check;
-   http_json $check;
- };
-
-This matches the value at the given JSON pointer with the given check.  If C<$json_pointer> is omitted, then the comparison is made against the
-whole JSON response.
-
-=cut
-
-sub http_json
-{
-  my($pointer, $expect) = @_ == 1 ? ('', $_[0]) : (@_);
-  my($build, @cmpargs) = _build;
-  $build->add_http_check(
-    sub {
-      my($res) = @_;
-      
-      my $object = eval {
-        decode_json($res->decoded_content)
-      };
-      if(my $error = $@)
-      {
-        # this is terrible!
-        $error =~ s/ at \S+ line [0-9]+\.//;
-        die "error decoding JSON: $error\n";
-      }
-      (
-        JSON::Pointer->get($object, $pointer),
-        JSON::Pointer->contains($object, $pointer),
-      )
-    },
-    [DEREF => $pointer eq '' ? 'json' : "json $pointer"],
-    Test2::Compare::Wildcard->new(
-      expect => $expect,
-      @cmpargs,
-    ),
-  );
 }
 
 =head3 http_is_info, http_is_success, http_is_redirect, http_is_error, http_is_client_error, http_is_server_error

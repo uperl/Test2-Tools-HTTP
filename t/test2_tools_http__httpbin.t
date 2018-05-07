@@ -1,5 +1,6 @@
 use Test2::V0 -no_srand => 1;
 use Test2::Tools::HTTP;
+use Test2::Tools::JSON::Pointer;
 use Test2::Require::Internet -tcp => [ 'httpbin.org', 'http' ];
 use HTTP::Request::Common;
 
@@ -130,7 +131,7 @@ http_request(
   GET('/cookies'),
   http_response {
     http_is_success;
-    http_json '/cookies' => {};
+    http_content json '/cookies' => {};
   },
 );
 
@@ -145,7 +146,7 @@ http_request(
   GET('/cookies'),
   http_response {
     http_is_success;
-    http_json '/cookies' => { foo => 'bar' };
+    http_content json '/cookies' => { foo => 'bar' };
   },
 );
 
@@ -160,7 +161,7 @@ http_request(
   GET('/cookies'),
   http_response {
     http_is_success;
-    http_json '/cookies' => {};
+    http_content json '/cookies' => {};
   },
 );
 
