@@ -22,6 +22,7 @@ $modules{$_} = $_ for qw(
   Test2::Compare::Wildcard
   Test2::Mock
   Test2::Require
+  Test2::Require::Module
   Test2::Tools::JSON::Pointer
   Test2::Tools::URL
   Test2::V0

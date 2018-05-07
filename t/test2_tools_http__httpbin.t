@@ -1,3 +1,4 @@
+use Test2::Require::Module 'Test2::Tools::JSON::Pointer';
 use Test2::V0 -no_srand => 1;
 use Test2::Tools::HTTP;
 use Test2::Tools::JSON::Pointer;
