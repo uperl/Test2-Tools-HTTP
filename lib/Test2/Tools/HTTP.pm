@@ -243,11 +243,13 @@ sub http_message ($)
    http_content $check;
  };
 
-The decoded response body content.  This is the I<decoded> content, as for most application testing this is what you will be interested in.
-If you want to test the undecoded content you can use call instead:
+The response body content.  Attempt to decode using the L<HTTP::Message> method C<decoded_content>, otherwise use the raw
+response body.  If you want specifically the decoded content or the raw content you can use C<call> to specifically check
+against them:
 
  http_response {
-   call content => $check;
+   call content => $check1;
+   call decoded_content => $check2;
  };
 
 =cut
@@ -255,7 +257,19 @@ If you want to test the undecoded content you can use call instead:
 sub http_content ($)
 {
   my($expect) = @_;
-  _add_call('decoded_content', $expect);
+  #_add_call('decoded_content', $expect);
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      ($res->decoded_content || $res->content, 1);
+    },
+    [DREF => 'content'],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    )
+  );
 }
 
 =head3 http_is_info, http_is_success, http_is_redirect, http_is_error, http_is_client_error, http_is_server_error
