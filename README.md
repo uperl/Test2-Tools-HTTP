@@ -60,6 +60,8 @@ Make a HTTP request.  If there is a client level error then it will fail immedia
 `object {}` or `http_request` comparison check to inspect the HTTP response and ensure that it matches what you
 expect.
 
+Only one request is made by default, so fowards are not automatically followed.
+
 ## http\_response
 
     my $check = http_response {
