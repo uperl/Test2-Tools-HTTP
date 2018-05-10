@@ -95,30 +95,22 @@ sub http_request
   $req = $req->clone;
 
   my $url = URI->new_abs($req->uri, http_base_url());
-  my $key = _uri_key($url);
 
   $message ||= "@{[ $req->method ]} @{[ $url ]}";
 
   my $ctx = context();
   my $ok = 1;
   my @diag;
-  my $res;
   my $connection_error = 0;
 
-  if(my $tester = $psgi{$key})
+  if($req->uri =~ /^\//)
   {
-    $res = $tester->request($req);
+    $req->uri(
+      URI->new_abs($req->uri, http_base_url())->as_string
+    );
   }
-  else
-  {
-    if($req->uri =~ /^\//)
-    {
-      $req->uri(
-        URI->new_abs($req->uri, http_base_url())->as_string
-      );
-    }
-    $res = http_ua()->simple_request($req);
-  }
+
+  my $res = http_ua()->simple_request($req);
 
   if(my $warning = $res->header('Client-Warning'))
   {
@@ -590,6 +582,32 @@ sub http_ua
     $ua = LWP::UserAgent->new;
     $ua->env_proxy;
     $ua->cookie_jar({});
+  }
+
+  unless($ua->can('test2_tools_http'))
+  {
+    require Object::Extend;
+    my $original_ref = ref($ua);
+    Object::Extend::extend($ua,
+      test2_tools_http => sub { 1 },
+      simple_request   => sub {
+        my($self, $req) = @_;
+
+        my $url = URI->new_abs($req->uri, http_base_url());
+        my $key = _uri_key($url);
+
+        if(my $tester = $psgi{$key})
+        {
+          # TODO: is it worth implementing this?
+          die "simple_request method with more than one argument not supported" if @_ != 2;
+          return $tester->request($req);
+        }
+        else
+        {
+          return $original_ref->can('simple_request')->(@_);
+        }
+      },
+    );
   }
 
   $ua;
