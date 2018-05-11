@@ -34,6 +34,7 @@ Test HTTP / PSGI
     
     # test an external website
     http_request(
+      # you can also test against a real HTTP server
       GET('http://example.test'),
       http_response {
         http_is_success;
