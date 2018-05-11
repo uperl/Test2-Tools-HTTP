@@ -10,6 +10,7 @@ use Test2::Compare;
 use Test2::Compare::Wildcard;
 use Test2::Compare::Custom;
 use Test2::Tools::HTTP::UA;
+use Test2::Tools::HTTP::Apps;
 use URI;
 use Carp ();
 
@@ -135,6 +136,7 @@ This allows the user agent to follow rediects.
 =cut
 
 my $tx;
+my $apps = Test2::Tools::HTTP::Apps->new;
 
 sub http_request
 {
@@ -613,7 +615,7 @@ then localhost with a random unused port will be picked.
 sub http_base_url
 {
   my($new) = @_;  
-  Test2::Tools::HTTP::UA->base_url($new);
+  $apps->base_url($new);
 }
 
 =head2 http_ua [ua]
@@ -642,7 +644,7 @@ sub http_ua
   if($new)
   {
     require Test2::Tools::HTTP::UA::LWP;
-    $ua_wrapper = Test2::Tools::HTTP::UA::LWP->new($new);
+    $ua_wrapper = Test2::Tools::HTTP::UA::LWP->new($new, $apps);
     $ua_wrapper->instrument;
   }
 
@@ -663,8 +665,8 @@ sub psgi_app_add
 {
   my($url, $app) = @_ == 1 ? (http_base_url, @_) : (@_);
   require Plack::Test;
-  my $key = Test2::Tools::HTTP::UA->uri_key($url);
-  Test2::Tools::HTTP::UA->psgi->{$key} = Plack::Test->create($app);
+  my $key = $apps->uri_key($url);
+  $apps->psgi->{$key} = Plack::Test->create($app);
   return;
 }
 
@@ -681,8 +683,8 @@ sub psgi_app_del
 {
   my($url) = @_;
   $url ||= http_base_url;
-  my $key = Test2::Tools::HTTP::UA->uri_key($url);
-  delete Test2::Tools::HTTP::UA->psgi->{$key};
+  my $key = $apps->uri_key($url);
+  delete $apps->psgi->{$key};
   return;
 }
 

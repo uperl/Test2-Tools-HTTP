@@ -12,6 +12,8 @@ sub instrument
 {
   my($self) = @_;
   
+  my $apps = $self->apps;
+  
   unless($self->ua->can('test2_tools_http'))
   {
     require Object::Extend;
@@ -21,10 +23,10 @@ sub instrument
       simple_request   => sub {
         my($self, $req, $arg, $size) = @_;
 
-        my $url = URI->new_abs($req->uri, __PACKAGE__->base_url());
-        my $key = __PACKAGE__->uri_key($url);
+        my $url = URI->new_abs($req->uri, $apps->base_url());
+        my $key = $apps->uri_key($url);
 
-        if(my $tester = __PACKAGE__->psgi->{$key})
+        if(my $tester = $apps->psgi->{$key})
         {
           # TODO: is it worth implementing this?
           die "simple_request method with more than one argument not supported" if defined $arg || defined $size;;
