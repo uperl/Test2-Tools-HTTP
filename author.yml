@@ -16,6 +16,9 @@ pod_coverage:
   # for either Class or method.
   private:
     - Test2::Require::Internet#skip
+    # Todo: write doco for some of these
+    # instead of being lazy
     - Test2::Tools::HTTP::UA
     - Test2::Tools::HTTP::UA::LWP
     - Test2::Tools::HTTP::Apps
+    - Test2::Tools::HTTP::Tx
