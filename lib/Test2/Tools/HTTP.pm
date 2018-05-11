@@ -504,6 +504,7 @@ sub http_location_uri
  my $res  = http_last->res;
  my $bool = http_last->ok;
  my $bool = http_last->connection_error;
+ my $url  = http_last->location;
  http_last->note;
  http_last->diag;
 

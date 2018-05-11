@@ -180,6 +180,7 @@ so that it can be tested with [Test2::Tools::URL](https://metacpan.org/pod/Test2
     my $res  = http_last->res;
     my $bool = http_last->ok;
     my $bool = http_last->connection_error;
+    my $url  = http_last->location;
     http_last->note;
     http_last->diag;
 
