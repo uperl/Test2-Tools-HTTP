@@ -36,7 +36,7 @@ sub instrument
 sub request
 {
   my($self, $req, %options) = @_;
-  $options{follor_redirects}
+  $options{follow_redirects}
     ? $self->ua->request($req)
     : $self->ua->simple_request($req);
 }

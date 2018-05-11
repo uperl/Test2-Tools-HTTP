@@ -138,6 +138,7 @@ This allows the user agent to follow rediects.
 
 my $tx;
 my $apps = Test2::Tools::HTTP::Apps->new;
+my $ua_wrapper;
 
 sub http_request
 {
@@ -168,9 +169,8 @@ sub http_request
     );
   }
   
-  my $request_method = $options{follow_redirects} ? 'request' : 'simple_request';
-
-  my $res = http_ua()->$request_method($req);
+  http_ua(); # sets $ua_wrapper if not already
+  my $res = $ua_wrapper->request($req, %options);
 
   if(my $warning = $res->header('Client-Warning'))
   {
@@ -628,8 +628,6 @@ Gets/sets the L<LWP::UserAgent> object used to make requests against real web se
 If not provided, the default L<LWP::UserAgent> will call C<env_proxy> and add an in-memory cookie jar.
 
 =cut
-
-my $ua_wrapper;
 
 sub http_ua
 {
