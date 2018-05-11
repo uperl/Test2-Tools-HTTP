@@ -570,9 +570,7 @@ subtest 'test forward' => sub {
   psgi_app_add 'http://forward.test/' => sub {
 
     my $env = shift;
-    use YAML ();
-    note YAML::Dump($env);
-    
+
     # PATH_INFO: /foo
     if($env->{PATH_INFO} eq '/foo')
     {

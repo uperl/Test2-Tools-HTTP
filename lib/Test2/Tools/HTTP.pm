@@ -18,7 +18,20 @@ our @EXPORT    = qw(
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
 );
-our @EXPORT_OK = (@EXPORT);
+
+our %EXPORT_TAGS = (
+  short => [qw(
+    app req ua res code message content last content_type content_length content_length_ok location location_uri
+  )],
+);
+
+our %EXPORT_GEN = (
+  ua  => sub { \&http_ua },
+  req => sub { \&http_request },
+  res => sub { \&http_response },
+  app => sub { \&psgi_app_add },
+  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content last content_type content_length content_length_ok location location_uri ),
+);
 
 # ABSTRACT: Test HTTP / PSGI
 # VERSION
@@ -29,7 +42,7 @@ our @EXPORT_OK = (@EXPORT);
  use Test2::Tools::HTTP;
  use HTTP::Request::Common;
  
- psgi_add_app sub { [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ 'Test Document' ] ] };
+ psgi_add_app sub { [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ "Test Document\n" ] ] };
  
  # Internally test the app from within the .t file itself
  http_request(
@@ -38,7 +51,7 @@ our @EXPORT_OK = (@EXPORT);
    GET('/'),
    http_response {
  
-     http_code '200';
+     http_code 200;
  
      # http_response {} is a subclass of object {}
      # for HTTP::Response objects only, so you can
@@ -47,7 +60,7 @@ our @EXPORT_OK = (@EXPORT);
 
      http_content_type match qr/^text\/(html|plain)$/;
      http_content_type_charset 'UTF-8';
-     http_content qr/Test/;
+     http_content match qr/Test/;
    }
  );
 
@@ -65,13 +78,36 @@ our @EXPORT_OK = (@EXPORT);
  
  done_testing;
 
+with short names:
+
+ use Importer 'Test2::Tools::HTTP' => ':short';
+ use HTTP::Request::Common;
+ 
+ app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
+ 
+ req {
+   GET('/'),
+   res {
+     code 200;
+     message 'OK';
+     content_type 'text/plain';
+     content match qr/Test/;
+   },
+ };
+ 
+ done_testing;
+
 =head1 DESCRIPTION
 
 This module provides an interface for testing websites and PSGI based apps with a L<Test2> style comparisons interface.
+By default it uses long function names with either a C<http_> or C<psgi_app> prefix.  The intent is to make the module
+usable when you are importing lots of symbols from lots of different modules while reducing the chance of collisions.
+You can instead import C<:short> which will give you the most commonly used tools with short names.  The short names
+are indicated below in square brackets.
 
 =head1 FUNCTIONS
 
-=head2 http_request
+=head2 http_request [req]
 
  http_request($request);
  http_request($request, $check);
@@ -166,7 +202,7 @@ sub http_request
   $ok;
 }
 
-=head2 http_response
+=head2 http_response [res]
 
  my $check = http_response {
    ... # object or http checks
@@ -184,7 +220,7 @@ sub http_response (&)
   );
 }
 
-=head3 http_code
+=head3 http_code [code]
 
  http_response {
    http_code $check;
@@ -244,7 +280,7 @@ sub http_code ($)
   _add_call('code', $expect);
 }
 
-=head3 http_message
+=head3 http_message [message]
 
  http_response {
    http_message $check;
@@ -260,7 +296,7 @@ sub http_message ($)
   _add_call('message', $expect);
 }
 
-=head3 http_content
+=head3 http_content [content]
 
  http_response {
    http_content $check;
@@ -363,7 +399,7 @@ sub http_isnt_error        { _add_call('is_error',        _F()) }
 sub http_isnt_client_error { _add_call('is_client_error', _F()) }
 sub http_isnt_server_error { _add_call('is_server_error', _F()) }
 
-=head3 http_content_type, http_content_type_charset
+=head3 http_content_type [content_type], http_content_type_charset 
 
  http_response {
    http_content_type $check;
@@ -395,7 +431,7 @@ sub http_content_type_charset
 # TODO: header $key => $check
 # TODO: cookie $key => $check ??
 
-=head3 http_content_length
+=head3 http_content_length [content_length]
 
  http_response {
    http_content_length $check;
@@ -411,7 +447,7 @@ sub http_content_length
   _add_call('content_length', $check);
 }
 
-=head3 http_content_length_ok
+=head3 http_content_length_ok [content_length_ok]
 
  http_response {
    http_content_length_ok;
@@ -445,7 +481,7 @@ sub http_content_length_ok
 
 }
 
-=head3 http_location, http_location_uri
+=head3 http_location [location], http_location_uri [location_uri]
 
  http_response {
    http_location $check;
@@ -498,7 +534,7 @@ sub http_location_uri
   );
 }
 
-=head2 http_last
+=head2 http_last [last]
 
  my $req  = http_last->req;
  my $res  = http_last->res;
@@ -593,7 +629,7 @@ sub http_base_url
   $base_url;
 }
 
-=head2 http_ua
+=head2 http_ua [ua]
 
  http_ua(LWP::UserAgent->new);
  my $ua = http_ua;
@@ -647,7 +683,7 @@ sub http_ua
   $ua;
 }
 
-=head2 psgi_app_add
+=head2 psgi_app_add [app]
 
  psgi_app_add $app;
  psgi_app_add $url, $app;

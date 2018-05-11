@@ -8,7 +8,7 @@ Test HTTP / PSGI
     use Test2::Tools::HTTP;
     use HTTP::Request::Common;
     
-    psgi_add_app sub { [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ 'Test Document' ] ] };
+    psgi_add_app sub { [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ "Test Document\n" ] ] };
     
     # Internally test the app from within the .t file itself
     http_request(
@@ -17,7 +17,7 @@ Test HTTP / PSGI
       GET('/'),
       http_response {
     
-        http_code '200';
+        http_code 200;
     
         # http_response {} is a subclass of object {}
         # for HTTP::Response objects only, so you can
@@ -26,7 +26,7 @@ Test HTTP / PSGI
 
         http_content_type match qr/^text\/(html|plain)$/;
         http_content_type_charset 'UTF-8';
-        http_content qr/Test/;
+        http_content match qr/Test/;
       }
     );
 
@@ -44,13 +44,36 @@ Test HTTP / PSGI
     
     done_testing;
 
+with short names:
+
+    use Importer 'Test2::Tools::HTTP' => ':short';
+    use HTTP::Request::Common;
+    
+    app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
+    
+    req {
+      GET('/'),
+      res {
+        code 200;
+        message 'OK';
+        content_type 'text/plain';
+        content match qr/Test/;
+      },
+    };
+    
+    done_testing;
+
 # DESCRIPTION
 
 This module provides an interface for testing websites and PSGI based apps with a [Test2](https://metacpan.org/pod/Test2) style comparisons interface.
+By default it uses long function names with either a `http_` or `psgi_app` prefix.  The intent is to make the module
+usable when you are importing lots of symbols from lots of different modules while reducing the chance of collisions.
+You can instead import `:short` which will give you the most commonly used tools with short names.  The short names
+are indicated below in square brackets.
 
 # FUNCTIONS
 
-## http\_request
+## http\_request \[req\]
 
     http_request($request);
     http_request($request, $check);
@@ -68,7 +91,7 @@ Otions:
 
     This allows the user agent to follow rediects.
 
-## http\_response
+## http\_response \[res\]
 
     my $check = http_response {
       ... # object or http checks
@@ -76,7 +99,7 @@ Otions:
 
 This is a comparison check specific to HTTP::Response objects.  You may include these subchecks:
 
-### http\_code
+### http\_code \[code\]
 
     http_response {
       http_code $check;
@@ -84,7 +107,7 @@ This is a comparison check specific to HTTP::Response objects.  You may include 
 
 The HTTP status code should match the given check.
 
-### http\_message
+### http\_message \[message\]
 
     http_response {
       http_message $check;
@@ -92,7 +115,7 @@ The HTTP status code should match the given check.
 
 The HTTP status message ('OK' for 200, 'Not Found' for 404, etc) should match the given check.
 
-### http\_content
+### http\_content \[content\]
 
     http_response {
       http_content $check;
@@ -133,7 +156,7 @@ Checks that the response is of the specified type.  See [HTTP::Status](https://m
 
 Checks that the response is NOT of the specified type.  See [HTTP::Status](https://metacpan.org/pod/HTTP::Status) for the meaning of each of these.
 
-### http\_content\_type, http\_content\_type\_charset
+### http\_content\_type \[content\_type\], http\_content\_type\_charset 
 
     http_response {
       http_content_type $check;
@@ -148,7 +171,7 @@ Check that the `Content-Type` header matches the given checks.  `http_content_ty
       http_content_type_charset 'UTF-8';
     };
 
-### http\_content\_length
+### http\_content\_length \[content\_length\]
 
     http_response {
       http_content_length $check;
@@ -156,7 +179,7 @@ Check that the `Content-Type` header matches the given checks.  `http_content_ty
 
 Check that the `Content-Length` header matches the given check.
 
-### http\_content\_length\_ok
+### http\_content\_length\_ok \[content\_length\_ok\]
 
     http_response {
       http_content_length_ok;
@@ -164,7 +187,7 @@ Check that the `Content-Length` header matches the given check.
 
 Checks that the `Content-Length` header matches the actual length of the content.
 
-### http\_location, http\_location\_uri
+### http\_location \[location\], http\_location\_uri \[location\_uri\]
 
     http_response {
       http_location $check;
@@ -174,7 +197,7 @@ Checks that the `Content-Length` header matches the actual length of the content
 Check the `Location` HTTP header.  The `http_location_uri` variant converts `Location` to a [URI](https://metacpan.org/pod/URI) using the base URL of the response
 so that it can be tested with [Test2::Tools::URL](https://metacpan.org/pod/Test2::Tools::URL).
 
-## http\_last
+## http\_last \[last\]
 
     my $req  = http_last->req;
     my $res  = http_last->res;
@@ -235,7 +258,7 @@ Sets the base URL for all requests made by `http_request`.  This is used if you 
 If you use `psgi_add_app` without a URL, then this is the URL which will be used to access your app.  If you do not specify a base URL,
 then localhost with a random unused port will be picked.
 
-## http\_ua
+## http\_ua \[ua\]
 
     http_ua(LWP::UserAgent->new);
     my $ua = http_ua;
@@ -243,7 +266,7 @@ then localhost with a random unused port will be picked.
 Gets/sets the [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object used to make requests against real web servers.  For tests against a PSGI app, this will NOT be used.
 If not provided, the default [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) will call `env_proxy` and add an in-memory cookie jar.
 
-## psgi\_app\_add
+## psgi\_app\_add \[app\]
 
     psgi_app_add $app;
     psgi_app_add $url, $app;

@@ -13,6 +13,7 @@ $modules{$_} = $_ for qw(
   ExtUtils::MakeMaker
   HTTP::Request
   HTTP::Request::Common
+  Importer
   LWP::UserAgent
   Object::Extend
   Plack
@@ -28,7 +29,6 @@ $modules{$_} = $_ for qw(
   Test2::Tools::URL
   Test2::V0
   URI
-  YAML
 );
 
 
