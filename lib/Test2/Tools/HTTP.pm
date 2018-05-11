@@ -644,8 +644,7 @@ sub http_ua
 
   if($new)
   {
-    require Test2::Tools::HTTP::UA::LWP;
-    $ua_wrapper = Test2::Tools::HTTP::UA::LWP->new($new, $apps);
+    $ua_wrapper = Test2::Tools::HTTP::UA->new($new, $apps);
     $ua_wrapper->instrument;
   }
 
