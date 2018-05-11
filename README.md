@@ -157,7 +157,7 @@ Checks that the response is of the specified type.  See [HTTP::Status](https://m
 
 Checks that the response is NOT of the specified type.  See [HTTP::Status](https://metacpan.org/pod/HTTP::Status) for the meaning of each of these.
 
-### http\_content\_type \[content\_type\], http\_content\_type\_charset 
+### http\_content\_type \[content\_type\], http\_content\_type\_charset \[charset\]
 
     http_response {
       http_content_type $check;

@@ -21,16 +21,17 @@ our @EXPORT    = qw(
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content last content_type content_length content_length_ok location location_uri
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri http_last
   )],
 );
 
 our %EXPORT_GEN = (
-  ua  => sub { \&http_ua },
-  req => sub { \&http_request },
-  res => sub { \&http_response },
-  app => sub { \&psgi_app_add },
-  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content last content_type content_length content_length_ok location location_uri ),
+  ua      => sub { \&http_ua },
+  req     => sub { \&http_request },
+  res     => sub { \&http_response },
+  app     => sub { \&psgi_app_add },
+  charset => sub { \&http_content_type_charset },
+  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri ),
 );
 
 # ABSTRACT: Test HTTP / PSGI
@@ -400,7 +401,7 @@ sub http_isnt_error        { _add_call('is_error',        _F()) }
 sub http_isnt_client_error { _add_call('is_client_error', _F()) }
 sub http_isnt_server_error { _add_call('is_server_error', _F()) }
 
-=head3 http_content_type [content_type], http_content_type_charset 
+=head3 http_content_type [content_type], http_content_type_charset [charset]
 
  http_response {
    http_content_type $check;

@@ -2,8 +2,87 @@ use Test2::Require::Module 'Importer';
 use Test2::V0 -no_srand => 1;
 use Importer 'Test2::Tools::HTTP' => ':short';
 
-imported_ok 'ua';
-imported_ok 'res';
-imported_ok 'req';
+subtest 'imports' => sub {
+  imported_ok 'ua';
+  imported_ok 'res';
+  imported_ok 'req';
+  not_imported_ok 'http_request';
+  not_imported_ok 'http_response';
+  not_imported_ok 'http_ua';
+};
+
+subtest 'ua' => sub {
+
+  isa_ok ua(), 'LWP::UserAgent';
+
+};
+
+subtest 'x' => sub {
+
+  require HTTP::Request::Common;
+  my $get = Importer->get('HTTP::Request::Common' => 'GET')->{GET};
+
+  app 'http://x.test/' => sub {
+    my $env = shift;
+    if($env->{PATH_INFO} eq '/foo')
+    {
+      return [ 302, [ 'Content-Type' => 'text/plain;charset-UTF-8', 'Content-Length' => 1, Location => '/foo/' ], ["\n"] ];
+    }
+    elsif($env->{PATH_INFO} eq '/foo/')
+    {
+      return [ 200, [ 'Content-Type' => 'text/plain;charset=UTF-8', 'Content-Length' => 3 ], [ "xx\n" ] ];
+    }
+    else
+    {
+      return [ 404, [ 'Content-Type' => 'text/plain;charset=UTF-8', 'Content-Length' => 14 ], [ "404 Not Found\n" ] ];
+    }
+  };
+  
+  req(
+    $get->('http://x.test/'),
+    res {
+      code 404;
+      message 'Not Found';
+      content "404 Not Found\n";
+      content_length_ok;
+    },
+  );
+  
+  http_last->note;
+  
+  req(
+    $get->('http://x.test/foo'),
+    res {
+      code 302;
+      location '/foo/';
+      location_uri 'http://x.test/foo/';
+      content_length_ok;
+    }
+  );
+
+  http_last->note;
+  
+  req(
+    $get->('http://x.test/foo/'),
+    res {
+      code 200;
+      message 'OK';
+      content_type 'text/plain';
+      charset 'UTF-8';
+      content "xx\n";
+      content_length 3;
+      content_length_ok;
+    }
+  );
+  
+  http_last->note;
+  
+};
+
+subtest 'http_last' => sub {
+
+  isa_ok http_last(), 'Test2::Tools::HTTP::Last';
+
+};
 
 done_testing;
