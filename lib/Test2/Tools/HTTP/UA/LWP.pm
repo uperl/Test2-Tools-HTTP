@@ -30,7 +30,7 @@ sub instrument
     }
   };
   
-  $self->ua->add_handler( 'request_send' => $cb );
+  $self->ua->set_my_handler( 'request_send' => $cb );
 }
 
 sub request
