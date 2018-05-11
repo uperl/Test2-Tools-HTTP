@@ -69,7 +69,7 @@ This module provides an interface for testing websites and PSGI based apps with 
 By default it uses long function names with either a `http_` or `psgi_app` prefix.  The intent is to make the module
 usable when you are importing lots of symbols from lots of different modules while reducing the chance of collisions.
 You can instead import `:short` which will give you the most commonly used tools with short names.  The short names
-are indicated below in square brackets.
+are indicated below in square brackets, and were picked to not conflict with [Test2::V0](https://metacpan.org/pod/Test2::V0).
 
 # FUNCTIONS
 
