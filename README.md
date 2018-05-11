@@ -55,12 +55,18 @@ This module provides an interface for testing websites and PSGI based apps with 
     http_request($request);
     http_request($request, $check);
     http_request($request, $check, $message);
+    http_request([$request, %options], ... );
 
 Make a HTTP request.  If there is a client level error then it will fail immediately.  Otherwise you can use a
 `object {}` or `http_request` comparison check to inspect the HTTP response and ensure that it matches what you
-expect.
+expect.  By default only one request is made.  If the response is a forward (has a `Location` header) you can
+use the `http_last-`location> method to make the next request.
 
-Only one request is made by default, so fowards are not automatically followed.
+Otions:
+
+- follow\_redirects
+
+    This allows the user agent to follow rediects.
 
 ## http\_response
 
@@ -198,6 +204,10 @@ related to the last `http_request`.
 - http\_last->connection\_error.
 
     True if there was a connection error during the last `http_request`.
+
+- http\_last->location
+
+    The `Location` header converted to an absolute URL, if included in the response.
 
 - http\_last->note
 

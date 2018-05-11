@@ -14,6 +14,7 @@ $modules{$_} = $_ for qw(
   HTTP::Request
   HTTP::Request::Common
   LWP::UserAgent
+  Object::Extend
   Plack
   Test2::API
   Test2::Compare
@@ -27,6 +28,7 @@ $modules{$_} = $_ for qw(
   Test2::Tools::URL
   Test2::V0
   URI
+  YAML
 );
 
 

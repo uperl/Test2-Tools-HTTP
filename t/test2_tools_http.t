@@ -565,4 +565,62 @@ subtest 'location, location_url' => sub {
 
 };
 
+subtest 'test forward' => sub {
+
+  psgi_app_add 'http://forward.test/' => sub {
+
+    my $env = shift;
+    use YAML ();
+    note YAML::Dump($env);
+    
+    # PATH_INFO: /foo
+    if($env->{PATH_INFO} eq '/foo')
+    {
+      return [ 302, [ Location => '/foo/' ], [''] ];
+    }
+    
+    if($env->{PATH_INFO} eq '/foo/')
+    {
+      return [ 200, [ 'Content-Type' => 'text/plain' ], [ 'foo-text' ] ];
+    }
+    
+    [ 404, [ 'Content-Type' => 'text/plain' ], [ '404 Not Found' ] ];
+  };
+  
+  http_request(
+    GET('http://forward.test/foo'),
+    http_response {
+      http_code 302;
+      http_location '/foo/';
+    },
+  );
+  
+  is(
+    http_last->location,
+    'http://forward.test/foo/',
+  );
+  
+  http_request(
+    GET(http_last->location),
+    http_response {
+      http_code 200;
+      http_content 'foo-text';
+    },
+  );
+
+  is(
+    http_last->location,
+    U(),,
+  );
+  
+  http_request(
+    [ GET('http://forward.test/foo'), follow_redirects => 1 ],
+    http_response {
+      http_code 200;
+      http_content 'foo-text';
+    },
+  );
+  
+};
+
 done_testing

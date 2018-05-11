@@ -76,12 +76,22 @@ This module provides an interface for testing websites and PSGI based apps with 
  http_request($request);
  http_request($request, $check);
  http_request($request, $check, $message);
+ http_request([$request, %options], ... );
 
 Make a HTTP request.  If there is a client level error then it will fail immediately.  Otherwise you can use a
 C<object {}> or C<http_request> comparison check to inspect the HTTP response and ensure that it matches what you
-expect.
+expect.  By default only one request is made.  If the response is a forward (has a C<Location> header) you can
+use the C<http_last->location> method to make the next request.
 
-Only one request is made by default, so fowards are not automatically followed.
+Otions:
+
+=over 4
+
+=item follow_redirects
+
+This allows the user agent to follow rediects.
+
+=back
 
 =cut
 
@@ -91,6 +101,13 @@ my $last;
 sub http_request
 {
   my($req, $check, $message) = @_;
+
+  my %options;
+
+  if(ref $req eq 'ARRAY')
+  {
+    ($req, %options) = @$req;
+  }
 
   $req = $req->clone;
 
@@ -109,8 +126,10 @@ sub http_request
       URI->new_abs($req->uri, http_base_url())->as_string
     );
   }
+  
+  my $request_method = $options{follow_redirects} ? 'request' : 'simple_request';
 
-  my $res = http_ua()->simple_request($req);
+  my $res = http_ua()->$request_method($req);
 
   if(my $warning = $res->header('Client-Warning'))
   {
@@ -132,8 +151,18 @@ sub http_request
   $ctx->ok($ok, $message, \@diag);
   $ctx->release;
 
-  $last = bless { req => $req, res => $res, ok => $ok, connection_error => $connection_error }, 'Test2::Tools::HTTP::Last';
-  
+  $last = bless {
+    req              => $req,
+    res              => $res,
+    ok               => $ok,
+    connection_error => $connection_error,
+    location         => do {
+      $res->header('Location')
+        ? URI->new_abs($res->header('Location'), $res->base)
+        : undef;
+    },
+  }, 'Test2::Tools::HTTP::Last';
+
   $ok;
 }
 
@@ -502,6 +531,10 @@ True if the last call to C<http_request> passed.
 
 True if there was a connection error during the last C<http_request>.
 
+=item http_last->location
+
+The C<Location> header converted to an absolute URL, if included in the response.
+
 =item http_last->note
 
 Send the request, response and ok to Test2's "note" output.  Note that the message bodies may be decoded, but
@@ -591,7 +624,7 @@ sub http_ua
     Object::Extend::extend($ua,
       test2_tools_http => sub { 1 },
       simple_request   => sub {
-        my($self, $req) = @_;
+        my($self, $req, $arg, $size) = @_;
 
         my $url = URI->new_abs($req->uri, http_base_url());
         my $key = _uri_key($url);
@@ -599,7 +632,7 @@ sub http_ua
         if(my $tester = $psgi{$key})
         {
           # TODO: is it worth implementing this?
-          die "simple_request method with more than one argument not supported" if @_ != 2;
+          die "simple_request method with more than one argument not supported" if defined $arg || defined $size;;
           return $tester->request($req);
         }
         else
@@ -663,6 +696,8 @@ sub req { shift->{req} }
 sub res { shift->{res} }
 sub ok  { shift->{ok}  }
 sub connection_error { shift->{connection_error} }
+
+sub location { shift->{location} }
 
 sub _note_or_diag
 {
