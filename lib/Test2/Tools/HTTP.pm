@@ -9,6 +9,7 @@ use Test2::API qw( context );
 use Test2::Compare;
 use Test2::Compare::Wildcard;
 use Test2::Compare::Custom;
+use Test2::Tools::HTTP::UA;
 use URI;
 use Carp ();
 
@@ -133,7 +134,6 @@ This allows the user agent to follow rediects.
 
 =cut
 
-my %psgi;
 my $tx;
 
 sub http_request
@@ -610,25 +610,10 @@ then localhost with a random unused port will be picked.
 
 =cut
 
-my $base_url;
-
 sub http_base_url
 {
-  my($new) = @_;
-
-  if($new)
-  {
-    $base_url = ref $new ? $new : URI->new($new);
-  }
-  
-  unless(defined $base_url)
-  {
-    $base_url = URI->new('http://localhost/');
-    require IO::Socket::INET;
-    $base_url->port(IO::Socket::INET->new(Listen => 5, LocalAddr => "127.0.0.1")->sockport);
-  }
-
-  $base_url;
+  my($new) = @_;  
+  Test2::Tools::HTTP::UA->base_url($new);
 }
 
 =head2 http_ua [ua]
@@ -641,48 +626,27 @@ If not provided, the default L<LWP::UserAgent> will call C<env_proxy> and add an
 
 =cut
 
-my $ua;
+my $ua_wrapper;
 
 sub http_ua
 {
   my($new) = @_;
 
-  $ua = $new if $new;
-
-  unless(defined $ua)
+  unless(defined $ua_wrapper)
   {
-    $ua = LWP::UserAgent->new;
-    $ua->env_proxy;
-    $ua->cookie_jar({});
+    $new = LWP::UserAgent->new;
+    $new->env_proxy;
+    $new->cookie_jar({});
   }
 
-  unless($ua->can('test2_tools_http'))
+  if($new)
   {
-    require Object::Extend;
-    my $original_ref = ref($ua);
-    Object::Extend::extend($ua,
-      test2_tools_http => sub { 1 },
-      simple_request   => sub {
-        my($self, $req, $arg, $size) = @_;
-
-        my $url = URI->new_abs($req->uri, http_base_url());
-        my $key = _uri_key($url);
-
-        if(my $tester = $psgi{$key})
-        {
-          # TODO: is it worth implementing this?
-          die "simple_request method with more than one argument not supported" if defined $arg || defined $size;;
-          return $tester->request($req);
-        }
-        else
-        {
-          return $original_ref->can('simple_request')->(@_);
-        }
-      },
-    );
+    require Test2::Tools::HTTP::UA::LWP;
+    $ua_wrapper = Test2::Tools::HTTP::UA::LWP->new($new);
+    $ua_wrapper->instrument;
   }
 
-  $ua;
+  $ua_wrapper->ua;
 }
 
 =head2 psgi_app_add [app]
@@ -695,19 +659,12 @@ instead of making a real HTTP request via L<LWP::UserAgent>.
 
 =cut
 
-sub _uri_key
-{
-  my($uri) = @_;
-  $uri = URI->new($uri) unless ref $uri;
-  join ':', map { $uri->$_ } qw( scheme host port );
-}
-
 sub psgi_app_add
 {
   my($url, $app) = @_ == 1 ? (http_base_url, @_) : (@_);
   require Plack::Test;
-  my $key = _uri_key $url;
-  $psgi{$key} = Plack::Test->create($app);
+  my $key = Test2::Tools::HTTP::UA->uri_key($url);
+  Test2::Tools::HTTP::UA->psgi->{$key} = Plack::Test->create($app);
   return;
 }
 
@@ -724,8 +681,8 @@ sub psgi_app_del
 {
   my($url) = @_;
   $url ||= http_base_url;
-  my $key = _uri_key $url;
-  delete $psgi{$key};
+  my $key = Test2::Tools::HTTP::UA->uri_key($url);
+  delete Test2::Tools::HTTP::UA->psgi->{$key};
   return;
 }
 

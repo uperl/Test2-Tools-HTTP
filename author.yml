@@ -16,3 +16,5 @@ pod_coverage:
   # for either Class or method.
   private:
     - Test2::Require::Internet#skip
+    - Test2::Tools::HTTP::UA
+    - Test2::Tools::HTTP::UA::LWP
