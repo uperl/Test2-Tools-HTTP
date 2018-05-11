@@ -48,7 +48,7 @@ subtest 'x' => sub {
     },
   );
   
-  http_last->note;
+  tx->note;
   
   req(
     $get->('http://x.test/foo'),
@@ -60,7 +60,7 @@ subtest 'x' => sub {
     }
   );
 
-  http_last->note;
+  tx->note;
   
   req(
     $get->('http://x.test/foo/'),
@@ -75,13 +75,13 @@ subtest 'x' => sub {
     }
   );
   
-  http_last->note;
+  tx->note;
   
 };
 
-subtest 'http_last' => sub {
+subtest 'tx' => sub {
 
-  isa_ok http_last(), 'Test2::Tools::HTTP::Last';
+  isa_ok tx(), 'Test2::Tools::HTTP::Tx';
 
 };
 

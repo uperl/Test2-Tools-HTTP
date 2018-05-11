@@ -84,7 +84,7 @@ are indicated below in square brackets, and were picked to not conflict with [Te
 Make a HTTP request.  If there is a client level error then it will fail immediately.  Otherwise you can use a
 `object {}` or `http_request` comparison check to inspect the HTTP response and ensure that it matches what you
 expect.  By default only one request is made.  If the response is a forward (has a `Location` header) you can
-use the `http_last-`location> method to make the next request.
+use the `http_tx-`location> method to make the next request.
 
 Otions:
 
@@ -198,48 +198,48 @@ Checks that the `Content-Length` header matches the actual length of the content
 Check the `Location` HTTP header.  The `http_location_uri` variant converts `Location` to a [URI](https://metacpan.org/pod/URI) using the base URL of the response
 so that it can be tested with [Test2::Tools::URL](https://metacpan.org/pod/Test2::Tools::URL).
 
-## http\_last \[last\]
+## http\_tx \[tx\]
 
-    my $req  = http_last->req;
-    my $res  = http_last->res;
-    my $bool = http_last->ok;
-    my $bool = http_last->connection_error;
-    my $url  = http_last->location;
-    http_last->note;
-    http_last->diag;
+    my $req  = http_tx->req;
+    my $res  = http_tx->res;
+    my $bool = http_tx->ok;
+    my $bool = http_tx->connection_error;
+    my $url  = http_tx->location;
+    http_tx->note;
+    http_tx->diag;
 
-This returns the last transaction object, which you can use to get the last request, response and status information
-related to the last `http_request`.
+This returns the most recent transaction object, which you can use to get the last request, response and status information
+related to the most recent `http_request`.
 
-- http\_last->req
+- http\_tx->req
 
     The [HTTP::Request](https://metacpan.org/pod/HTTP::Request) object.
 
-- http\_last->res
+- http\_tx->res
 
     The [HTTP::Response](https://metacpan.org/pod/HTTP::Response) object.
 
     Warning: In the case of a connection error, this may be a synthetic response produced by [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent), rather
     than an actual message from the remote end.
 
-- http\_last->ok
+- http\_tx->ok
 
-    True if the last call to `http_request` passed.
+    True if the most recent call to `http_request` passed.
 
-- http\_last->connection\_error.
+- http\_tx->connection\_error.
 
-    True if there was a connection error during the last `http_request`.
+    True if there was a connection error during the most recent `http_request`.
 
-- http\_last->location
+- http\_tx->location
 
     The `Location` header converted to an absolute URL, if included in the response.
 
-- http\_last->note
+- http\_tx->note
 
     Send the request, response and ok to Test2's "note" output.  Note that the message bodies may be decoded, but
     the headers will not be modified.
 
-- http\_last->diag
+- http\_tx->diag
 
     Send the request, response and ok to Test2's "diag" output.  Note that the message bodies may be decoded, but
     the headers will not be modified.

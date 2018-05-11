@@ -29,64 +29,64 @@ is($ret, T(), 'returns true');
 
 is(
   intercept {
-    http_last->note;
+    http_tx->note;
   },
   array {
     event Note => sub {
       call message => match qr/^GET /;
     };
     event Note => sub {
-      call message => http_last->req->headers->as_string;
+      call message => http_tx->req->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->req->decoded_content || http_last->req->decoded_content;
+      call message => http_tx->req->decoded_content || http_tx->req->decoded_content;
     };
     event Note => sub {
       call message => '200 OK';
     };
     event Note => sub {
-      call message => http_last->res->headers->as_string;
+      call message => http_tx->res->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->res->decoded_content || http_last->res->decoded_content;
+      call message => http_tx->res->decoded_content || http_tx->res->decoded_content;
     };
     event Note => sub {
       call message => "ok = 1";
     };
     etc;
   },
-  'http_last->note on ok',
+  'http_tx->note on ok',
 );
 
 is(
   intercept {
-    http_last->diag;
+    http_tx->diag;
   },
   array {
     event Diag => sub {
       call message => match qr/^GET /;
     };
     event Diag => sub {
-      call message => http_last->req->headers->as_string;
+      call message => http_tx->req->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->req->decoded_content || http_last->req->decoded_content;
+      call message => http_tx->req->decoded_content || http_tx->req->decoded_content;
     };
     event Diag => sub {
       call message => '200 OK';
     };
     event Diag => sub {
-      call message => http_last->res->headers->as_string;
+      call message => http_tx->res->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->res->decoded_content || http_last->res->decoded_content;
+      call message => http_tx->res->decoded_content || http_tx->res->decoded_content;
     };
     event Diag => sub {
       call message => "ok = 1";
     };
     etc;
   },
-  'http_last->note on ok',
+  'http_tx->note on ok',
 );
 
 is(
@@ -111,64 +111,64 @@ is($ret, F(), 'returns false');
 
 is(
   intercept {
-    http_last->note;
+    http_tx->note;
   },
   array {
     event Note => sub {
       call message => match qr/^GET /;
     };
     event Note => sub {
-      call message => http_last->req->headers->as_string;
+      call message => http_tx->req->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->req->decoded_content || http_last->req->content
+      call message => http_tx->req->decoded_content || http_tx->req->content
     };
     event Note => sub {
       call message => match qr/^500 /;
     };
     event Note => sub {
-      call message => http_last->res->headers->as_string;
+      call message => http_tx->res->headers->as_string;
     };
     event Note => sub {
-      call message => http_last->res->decoded_content || http_last->res->content
+      call message => http_tx->res->decoded_content || http_tx->res->content
     };
     event Note => sub {
       call message => "ok = 0";
     };
     etc;
   },
-  'http_last->note on fail',
+  'http_tx->note on fail',
 );
 
 is(
   intercept {
-    http_last->diag;
+    http_tx->diag;
   },
   array {
     event Diag => sub {
       call message => match qr/^GET /;
     };
     event Diag => sub {
-      call message => http_last->req->headers->as_string;
+      call message => http_tx->req->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->req->decoded_content || http_last->req->content
+      call message => http_tx->req->decoded_content || http_tx->req->content
     };
     event Diag => sub {
       call message => match qr/^500 /;
     };
     event Diag => sub {
-      call message => http_last->res->headers->as_string;
+      call message => http_tx->res->headers->as_string;
     };
     event Diag => sub {
-      call message => http_last->res->decoded_content || http_last->res->content
+      call message => http_tx->res->decoded_content || http_tx->res->content
     };
     event Diag => sub {
       call message => "ok = 0";
     };
     etc;
   },
-  'http_last->diag on fail',
+  'http_tx->diag on fail',
 );
 
 http_request(
@@ -222,21 +222,21 @@ subtest 'gzip' => sub {
     },
   );
 
-  my $decoded_content_length = length http_last->res->decoded_content;
-  my $undecoded_content_length = length http_last->res->content;
+  my $decoded_content_length = length http_tx->res->decoded_content;
+  my $undecoded_content_length = length http_tx->res->content;
 
   note "decoded   = ", $decoded_content_length;
   note "undecoded = ", $undecoded_content_length;
 
   is(
-    http_last->res,
+    http_tx->res,
     http_response {
       http_content_length $undecoded_content_length;
       http_content_length_ok;
     }
   );
 
-  my $res = http_last->res->clone;
+  my $res = http_tx->res->clone;
   $res->content($res->content . "  ");
 
   is(

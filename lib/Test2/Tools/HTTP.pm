@@ -13,7 +13,7 @@ use URI;
 use Carp ();
 
 our @EXPORT    = qw( 
-  http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_last http_is_success
+  http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_tx http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
@@ -21,7 +21,7 @@ our @EXPORT    = qw(
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri http_last
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx
   )],
 );
 
@@ -31,7 +31,7 @@ our %EXPORT_GEN = (
   res     => sub { \&http_response },
   app     => sub { \&psgi_app_add },
   charset => sub { \&http_content_type_charset },
-  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri ),
+  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri tx ),
 );
 
 # ABSTRACT: Test HTTP / PSGI
@@ -119,7 +119,7 @@ are indicated below in square brackets, and were picked to not conflict with L<T
 Make a HTTP request.  If there is a client level error then it will fail immediately.  Otherwise you can use a
 C<object {}> or C<http_request> comparison check to inspect the HTTP response and ensure that it matches what you
 expect.  By default only one request is made.  If the response is a forward (has a C<Location> header) you can
-use the C<http_last->location> method to make the next request.
+use the C<http_tx->location> method to make the next request.
 
 Otions:
 
@@ -134,7 +134,7 @@ This allows the user agent to follow rediects.
 =cut
 
 my %psgi;
-my $last;
+my $tx;
 
 sub http_request
 {
@@ -189,7 +189,7 @@ sub http_request
   $ctx->ok($ok, $message, \@diag);
   $ctx->release;
 
-  $last = bless {
+  $tx = bless {
     req              => $req,
     res              => $res,
     ok               => $ok,
@@ -199,7 +199,7 @@ sub http_request
         ? URI->new_abs($res->header('Location'), $res->base)
         : undef;
     },
-  }, 'Test2::Tools::HTTP::Last';
+  }, 'Test2::Tools::HTTP::Tx';
 
   $ok;
 }
@@ -536,50 +536,50 @@ sub http_location_uri
   );
 }
 
-=head2 http_last [last]
+=head2 http_tx [tx]
 
- my $req  = http_last->req;
- my $res  = http_last->res;
- my $bool = http_last->ok;
- my $bool = http_last->connection_error;
- my $url  = http_last->location;
- http_last->note;
- http_last->diag;
+ my $req  = http_tx->req;
+ my $res  = http_tx->res;
+ my $bool = http_tx->ok;
+ my $bool = http_tx->connection_error;
+ my $url  = http_tx->location;
+ http_tx->note;
+ http_tx->diag;
 
-This returns the last transaction object, which you can use to get the last request, response and status information
-related to the last C<http_request>.
+This returns the most recent transaction object, which you can use to get the last request, response and status information
+related to the most recent C<http_request>.
 
 =over 4
 
-=item http_last->req
+=item http_tx->req
 
 The L<HTTP::Request> object.
 
-=item http_last->res
+=item http_tx->res
 
 The L<HTTP::Response> object.
 
 Warning: In the case of a connection error, this may be a synthetic response produced by L<LWP::UserAgent>, rather
 than an actual message from the remote end.
 
-=item http_last->ok
+=item http_tx->ok
 
-True if the last call to C<http_request> passed.
+True if the most recent call to C<http_request> passed.
 
-=item http_last->connection_error.
+=item http_tx->connection_error.
 
-True if there was a connection error during the last C<http_request>.
+True if there was a connection error during the most recent C<http_request>.
 
-=item http_last->location
+=item http_tx->location
 
 The C<Location> header converted to an absolute URL, if included in the response.
 
-=item http_last->note
+=item http_tx->note
 
 Send the request, response and ok to Test2's "note" output.  Note that the message bodies may be decoded, but
 the headers will not be modified.
 
-=item http_last->diag
+=item http_tx->diag
 
 Send the request, response and ok to Test2's "diag" output.  Note that the message bodies may be decoded, but
 the headers will not be modified.
@@ -588,9 +588,9 @@ the headers will not be modified.
 
 =cut
 
-sub http_last
+sub http_tx
 {
-  $last;
+  $tx;
 }
 
 =head2 http_base_url
@@ -729,7 +729,7 @@ sub psgi_app_del
   return;
 }
 
-package Test2::Tools::HTTP::Last;
+package Test2::Tools::HTTP::Tx;
 
 sub req { shift->{req} }
 sub res { shift->{res} }

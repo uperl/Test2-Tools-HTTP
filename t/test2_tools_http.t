@@ -57,7 +57,7 @@ subtest 'basic' => sub {
   my $req;
   my $res;
 
-  is( http_last, undef, 'http_last starts out as undef' );
+  is( http_tx, undef, 'http_tx starts out as undef' );
 
   my $mock = Test2::Mock->new( class => 'LWP::UserAgent' );
 
@@ -104,11 +104,11 @@ EOM
       },
     );
 
-    isa_ok http_last, 'Test2::Tools::HTTP::Last';
-    isa_ok(http_last->req, 'HTTP::Request');
-    isa_ok(http_last->res, 'HTTP::Response');
-    is(http_last->ok, T());
-    is(http_last->connection_error, F());
+    isa_ok http_tx, 'Test2::Tools::HTTP::Tx';
+    isa_ok(http_tx->req, 'HTTP::Request');
+    isa_ok(http_tx->res, 'HTTP::Response');
+    is(http_tx->ok, T());
+    is(http_tx->connection_error, F());
 
     is $ret, T();
 
@@ -186,11 +186,11 @@ EOM
       },
     );
 
-    isa_ok http_last, 'Test2::Tools::HTTP::Last';
-    isa_ok(http_last->req, 'HTTP::Request');
-    isa_ok(http_last->res, 'HTTP::Response');
-    is(http_last->ok, F());
-    is(http_last->connection_error, T());
+    isa_ok http_tx, 'Test2::Tools::HTTP::Tx';
+    isa_ok(http_tx->req, 'HTTP::Request');
+    isa_ok(http_tx->res, 'HTTP::Response');
+    is(http_tx->ok, F());
+    is(http_tx->connection_error, T());
 
     is($ret, F());
 
@@ -232,10 +232,10 @@ subtest psgi => sub {
       },
     );
 
-    isa_ok http_last, 'Test2::Tools::HTTP::Last';
-    isa_ok(http_last->req, 'HTTP::Request');
-    isa_ok(http_last->res, 'HTTP::Response');
-    is(http_last->ok, T());
+    isa_ok http_tx, 'Test2::Tools::HTTP::Tx';
+    isa_ok(http_tx->req, 'HTTP::Request');
+    isa_ok(http_tx->res, 'HTTP::Response');
+    is(http_tx->ok, T());
 
     is(
       intercept {
@@ -255,10 +255,10 @@ subtest psgi => sub {
       },
     );
 
-    isa_ok http_last, 'Test2::Tools::HTTP::Last';
-    isa_ok(http_last->req, 'HTTP::Request');
-    isa_ok(http_last->res, 'HTTP::Response');
-    is(http_last->ok, F());
+    isa_ok http_tx, 'Test2::Tools::HTTP::Tx';
+    isa_ok(http_tx->req, 'HTTP::Request');
+    isa_ok(http_tx->res, 'HTTP::Response');
+    is(http_tx->ok, F());
 
     psgi_app_del;
 
@@ -594,12 +594,12 @@ subtest 'test forward' => sub {
   );
   
   is(
-    http_last->location,
+    http_tx->location,
     'http://forward.test/foo/',
   );
   
   http_request(
-    GET(http_last->location),
+    GET(http_tx->location),
     http_response {
       http_code 200;
       http_content 'foo-text';
@@ -607,7 +607,7 @@ subtest 'test forward' => sub {
   );
 
   is(
-    http_last->location,
+    http_tx->location,
     U(),,
   );
   
