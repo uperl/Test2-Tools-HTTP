@@ -4,6 +4,9 @@ use strict;
 use warnings;
 use Test2::API ();
 
+# ABSTRACT: Object representing the last transaction for Test2::Tools::HTTP
+# VERSION
+
 sub req { shift->{req} }
 sub res { shift->{res} }
 sub ok  { shift->{ok}  }
