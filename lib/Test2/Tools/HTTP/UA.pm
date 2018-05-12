@@ -65,4 +65,19 @@ sub apps
   shift->{apps};
 }
 
+sub error
+{
+  my(undef, $message, $res) = @_;
+  my $error = bless { message => $message, res => $res }, 'Test2::Tools::HTTP::UA::Error';
+  die $error;
+}
+
+package Test2::Tools::HTTP::UA::Error;
+
+use overload '""' => sub { shift->as_string };
+
+sub message { shift->{message} }
+sub res { shift->{res} }
+sub as_string { shift->message }
+
 1;

@@ -33,9 +33,19 @@ sub instrument
 sub request
 {
   my($self, $req, %options) = @_;
-  $options{follow_redirects}
+  my $res = $options{follow_redirects}
     ? $self->ua->request($req)
     : $self->ua->simple_request($req);
+
+  if(my $warning = $res->header('Client-Warning'))
+  {
+    $self->error(
+      "connection error: " . ($res->decoded_content || $warning),
+      $res,
+    );
+  }
+
+  $res;
 }
 
 1;

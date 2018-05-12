@@ -173,13 +173,14 @@ sub http_request
   }
 
   http_ua(); # sets $ua_wrapper if not already
-  my $res = $ua_wrapper->request($req, %options);
+  my $res = eval { $ua_wrapper->request($req, %options) };
 
-  if(my $warning = $res->header('Client-Warning'))
+  if(my $error = $@)
   {
     $ok = 0;
     $connection_error = 1;
-    push @diag, "connection error: " . ($res->decoded_content || $warning);
+    push @diag, "$error";
+    $res = eval { $error->res };
   }
 
   if($ok && defined $check)
@@ -201,8 +202,10 @@ sub http_request
     ok               => $ok,
     connection_error => $connection_error,
     location         => do {
-      $res->header('Location')
-        ? URI->new_abs($res->header('Location'), $res->base)
+      $res
+        ? $res->header('Location')
+          ? URI->new_abs($res->header('Location'), $res->base)
+          : undef
         : undef;
     },
   }, 'Test2::Tools::HTTP::Tx';

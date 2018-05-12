@@ -22,9 +22,12 @@ sub _note_or_diag
   $ctx->$method($self->req->method . ' ' . $self->req->uri);
   $ctx->$method($self->req->headers->as_string);
   $ctx->$method($self->req->decoded_content || $self->req->content);
-  $ctx->$method($self->res->code . ' ' . $self->res->message);
-  $ctx->$method($self->res->headers->as_string);
-  $ctx->$method($self->res->decoded_content || $self->res->content);
+  if($self->res)
+  {
+    $ctx->$method($self->res->code . ' ' . $self->res->message);
+    $ctx->$method($self->res->headers->as_string);
+    $ctx->$method($self->res->decoded_content || $self->res->content);
+  }
   $ctx->$method("ok = " . $self->ok);
   
   $ctx->release;
