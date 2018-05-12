@@ -17,10 +17,7 @@ sub instrument
   my $cb = $self->{request_send_cb} ||= sub {
     my($req, $ua, $h) = @_;
     
-    my $url = URI->new_abs($req->uri, $apps->base_url);
-    my $key = $apps->uri_key($url);
-    
-    if(my $tester = $apps->psgi->{$key})
+    if(my $tester = $apps->uri_to_app($req->uri))
     {
       return $tester->request($req);
     }

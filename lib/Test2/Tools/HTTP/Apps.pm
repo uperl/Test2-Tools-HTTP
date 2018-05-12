@@ -48,4 +48,13 @@ sub base_url
   $self->{base_url};
 }
 
+sub uri_to_app
+{
+  my($self, $uri) = @_;
+  
+  my $url = URI->new_abs($uri, $self->base_url);
+  my $key = $self->uri_key($url);
+  $self->psgi->{$key};
+}
+
 1;

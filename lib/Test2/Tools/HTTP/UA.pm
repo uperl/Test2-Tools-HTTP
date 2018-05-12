@@ -14,13 +14,29 @@ sub new
   if($class eq __PACKAGE__)
   {
     my $class;
+
+    # Not all of these may be installed.
+    # Not all of these may even be implemented.
     if(eval { $ua->isa('LWP::UserAgent') })
     {
-      $class = 'Test2::Tools::HTTP::UA::LWP';
+      $class = 'LWP';
+    }
+    elsif(eval { $ua->isa('HTTP::Tiny') })
+    {
+      $class = 'HTTPTiny';
+    }
+    elsif(eval { $ua->isa('Mojo::UserAgent') })
+    {
+      $class = 'Mojo';
+    }
+    elsif(eval { $ua->isa->('AnyEvent::HTTP') })
+    {
+      $class = 'AE';
     }
     
     if(defined $class)
     {
+      $class = "Test2::Tools::HTTP::UA::$class";
       my $pm = $class;
       $pm =~ s/::/\//g;
       $pm .= ".pm";

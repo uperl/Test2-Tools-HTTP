@@ -162,13 +162,16 @@ sub http_request
   my @diag;
   my $connection_error = 0;
 
-  if($req->uri =~ /^\//)
+  unless($apps->uri_to_app($req->uri))
   {
-    $req->uri(
-      URI->new_abs($req->uri, http_base_url())->as_string
-    );
+    if($req->uri =~ /^\//)
+    {
+      $req->uri(
+        URI->new_abs($req->uri, $apps->base_url),
+      );
+    }
   }
-  
+
   http_ua(); # sets $ua_wrapper if not already
   my $res = $ua_wrapper->request($req, %options);
 
@@ -633,7 +636,7 @@ sub http_ua
 {
   my($new) = @_;
 
-  unless(defined $ua_wrapper)
+  if( (!defined $ua_wrapper) && !$new)
   {
     $new = LWP::UserAgent->new;
     $new->env_proxy;
