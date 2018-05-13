@@ -86,11 +86,11 @@ Make a HTTP request.  If there is a client level error then it will fail immedia
 expect.  By default only one request is made.  If the response is a forward (has a `Location` header) you can
 use the `http_tx-`location> method to make the next request.
 
-Otions:
+Options:
 
 - follow\_redirects
 
-    This allows the user agent to follow rediects.
+    This allows the user agent to follow redirects.
 
 ## http\_response \[res\]
 

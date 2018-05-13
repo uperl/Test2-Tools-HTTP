@@ -9,6 +9,9 @@ pod_spelling_system:
     - diag
     - undecoded
     - subchecks
+    - req
+    - tx
+    - ua
 
 pod_coverage:
   skip: 0

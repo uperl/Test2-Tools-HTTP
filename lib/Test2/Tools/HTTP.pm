@@ -125,13 +125,13 @@ C<object {}> or C<http_request> comparison check to inspect the HTTP response an
 expect.  By default only one request is made.  If the response is a forward (has a C<Location> header) you can
 use the C<http_tx->location> method to make the next request.
 
-Otions:
+Options:
 
 =over 4
 
 =item follow_redirects
 
-This allows the user agent to follow rediects.
+This allows the user agent to follow redirects.
 
 =back
 
