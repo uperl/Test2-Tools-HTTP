@@ -625,7 +625,66 @@ subtest 'test forward' => sub {
       http_content_type_charset 'UTF-8';
     },
   );
+
+  psgi_app_del 'http://forward.test/';
   
+};
+
+subtest 'headers' => sub {
+
+  psgi_app_add 'http://header.test' => sub {
+    return [
+      200,
+      [
+        'Content-Type' => 'text/plain;charset=utf-8',
+        'Content-Length' => 3,
+        'X-Aaa-1' => 'This is a simple single header',
+        'X-Bbb-1' => 'comma,separated,list',
+        'X-Ccc-1' => 'line',
+        'X-Ccc-1' => 'separated',
+        'X-Ccc-1' => 'list',
+      ],
+      [ "xx\n" ],
+    ];
+  };
+
+  http_request(
+    GET('http://header.test'),
+    http_response {
+      http_headers hash {
+        field 'X-Aaa-1' => 'This is a simple single header';
+        field 'X-Bbb-1' => 'comma,separated,list';
+        field 'X-Ccc-1' => 'line,separated,list';
+        field 'Content-Type' => 'text/plain;charset=utf-8';
+        field 'Content-Length' => 3;
+        field 'X-Bogus' => DNE();
+        etc;
+      };
+    },
+  );
+
+  is(
+    intercept {
+      is(
+        http_tx->res,
+        http_response {
+          http_headers hash {
+            field 'X-Aaa-1' => 'alfred';
+            etc;
+          };
+        },
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  http_tx->note;
+
 };
 
 done_testing

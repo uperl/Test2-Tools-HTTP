@@ -20,11 +20,12 @@ our @EXPORT    = qw(
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
+  http_headers
 );
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers
   )],
 );
 
@@ -34,7 +35,7 @@ our %EXPORT_GEN = (
   res     => sub { \&http_response },
   app     => sub { \&psgi_app_add },
   charset => sub { \&http_content_type_charset },
-  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri tx ),
+  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri tx headers ),
 );
 
 # ABSTRACT: Test HTTP / PSGI
@@ -408,6 +409,44 @@ sub http_isnt_redirect     { _add_call('is_redirect',     _F()) }
 sub http_isnt_error        { _add_call('is_error',        _F()) }
 sub http_isnt_client_error { _add_call('is_client_error', _F()) }
 sub http_isnt_server_error { _add_call('is_server_error', _F()) }
+
+=head3 http_headers [headers]
+
+ http_response {
+   http_headers $check;
+ };
+
+Check the HTTP headers as converted into a Perl hash.  If the same header appears twice, then the values are joined together
+using the C<,> character.
+
+=cut
+
+sub http_headers
+{
+  my($expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+
+      my @headers = $res->flatten;
+      my %headers;
+      while(@headers)
+      {
+        my($key, $val) = splice @headers, 0, 2;
+        push @{ $headers{$key} }, $val;
+      }
+      $_ = join ',', @{$_} for values %headers;
+
+      (\%headers, 1);
+    },
+    [DREF => 'headers'],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),
+  );
+}
 
 =head3 http_content_type [content_type], http_content_type_charset [charset]
 

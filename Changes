@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Add http_headers [headers]
 
 0.01      2018-05-13 13:38:52 -0400
   - initial version

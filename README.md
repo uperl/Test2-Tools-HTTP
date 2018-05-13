@@ -157,6 +157,15 @@ Checks that the response is of the specified type.  See [HTTP::Status](https://m
 
 Checks that the response is NOT of the specified type.  See [HTTP::Status](https://metacpan.org/pod/HTTP::Status) for the meaning of each of these.
 
+### http\_headers \[headers\]
+
+    http_response {
+      http_headers $check;
+    };
+
+Check the HTTP headers as converted into a Perl hash.  If the same header appears twice, then the values are joined together
+using the `,` character.
+
 ### http\_content\_type \[content\_type\], http\_content\_type\_charset \[charset\]
 
     http_response {

@@ -30,7 +30,7 @@ subtest 'x' => sub {
     }
     elsif($env->{PATH_INFO} eq '/foo/')
     {
-      return [ 200, [ 'Content-Type' => 'text/plain;charset=UTF-8', 'Content-Length' => 3 ], [ "xx\n" ] ];
+      return [ 200, [ 'Content-Type' => 'text/plain;charset=UTF-8', 'Content-Length' => 3, 'X-Foo' => 'Bar' ], [ "xx\n" ] ];
     }
     else
     {
@@ -72,6 +72,10 @@ subtest 'x' => sub {
       content "xx\n";
       content_length 3;
       content_length_ok;
+      headers hash {
+        field 'X-Foo' => 'Bar';
+        etc;
+      };
     }
   );
   
