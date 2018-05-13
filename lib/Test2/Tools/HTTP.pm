@@ -668,9 +668,7 @@ instead of making a real HTTP request via L<LWP::UserAgent>.
 sub psgi_app_add
 {
   my($url, $app) = @_ == 1 ? (http_base_url, @_) : (@_);
-  require Plack::Test;
-  my $key = $apps->uri_key($url);
-  $apps->psgi->{$key} = Plack::Test->create($app);
+  $apps->add_psgi($url, $app);
   return;
 }
 
@@ -687,8 +685,7 @@ sub psgi_app_del
 {
   my($url) = @_;
   $url ||= http_base_url;
-  my $key = $apps->uri_key($url);
-  delete $apps->psgi->{$key};
+  $apps->del_psgi($url);
   return;
 }
 

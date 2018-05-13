@@ -24,9 +24,20 @@ sub uri_key
   join ':', map { $uri->$_ } qw( scheme host port );
 }
 
-sub psgi
+sub add_psgi
 {
-  shift->{psgi};
+  my($self, $uri, $app) = @_;
+  my $key = $self->uri_key($uri);
+  $self->{psgi}->{$key} = {
+    app => $app,
+  };
+}
+
+sub del_psgi
+{
+  my($self, $uri) = @_;
+  my $key = $self->uri_key($uri);
+  delete $self->{psgi}->{$key};
 }
 
 sub base_url
@@ -51,10 +62,23 @@ sub base_url
 sub uri_to_app
 {
   my($self, $uri) = @_;
-  
   my $url = URI->new_abs($uri, $self->base_url);
   my $key = $self->uri_key($url);
-  $self->psgi->{$key};
+  $self->{psgi}->{$key}->{app};
+}
+
+sub uri_to_tester
+{
+  my($self, $uri) = @_;
+  my $url = URI->new_abs($uri, $self->base_url);
+  my $key = $self->uri_key($url);
+  my $app = $self->{psgi}->{$key}->{app};
+  return unless $app;
+  
+  $self->{psgi}->{$key}->{tester} ||= do {
+    require Plack::Test;
+    Plack::Test->create($app);
+  };
 }
 
 1;

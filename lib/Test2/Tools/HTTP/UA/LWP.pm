@@ -12,12 +12,10 @@ sub instrument
 {
   my($self) = @_;
   
-  my $apps = $self->apps;
-
   my $cb = $self->{request_send_cb} ||= sub {
     my($req, $ua, $h) = @_;
     
-    if(my $tester = $apps->uri_to_app($req->uri))
+    if(my $tester = $self->apps->uri_to_tester($req->uri))
     {
       return $tester->request($req);
     }
