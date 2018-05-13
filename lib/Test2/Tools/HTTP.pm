@@ -327,7 +327,6 @@ against them:
 sub http_content ($)
 {
   my($expect) = @_;
-  #_add_call('decoded_content', $expect);
   my($build, @cmpargs) = _build;
   $build->add_http_check(
     sub {
@@ -429,14 +428,42 @@ C<http_content_type_charset> matches just the character set.  Hence:
 
 sub http_content_type
 {
-  my($check) = @_;
-  _add_call('content_type', $check);
+  my($expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      my $content_type = $res->content_type;
+      defined $content_type
+        ? ($content_type, 1)
+        : ($content_type, 0);
+    },
+    [DREF => 'content'],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    )
+  );
 }
 
 sub http_content_type_charset
 {
-  my($check) = @_;
-  _add_call('content_type_charset', $check);
+  my($expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      my $charset = $res->content_type_charset;
+      defined $charset
+        ? ($charset, 1)
+        : ($charset, 0);
+    },
+    [DREF => 'content'],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    )
+  );
 }
 
 # TODO: header $key => $check
