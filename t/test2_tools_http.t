@@ -574,15 +574,15 @@ subtest 'test forward' => sub {
     # PATH_INFO: /foo
     if($env->{PATH_INFO} eq '/foo')
     {
-      return [ 302, [ Location => '/foo/' ], [''] ];
+      return [ 302, [ 'Content-Type' => 'text/plain;charset=utf-8', Location => '/foo/' ], ['Go To /foo/'] ];
     }
     
     if($env->{PATH_INFO} eq '/foo/')
     {
-      return [ 200, [ 'Content-Type' => 'text/plain' ], [ 'foo-text' ] ];
+      return [ 200, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ 'foo-text' ] ];
     }
     
-    [ 404, [ 'Content-Type' => 'text/plain' ], [ '404 Not Found' ] ];
+    [ 404, [ 'Content-Type' => 'text/plain;charset=utf-8' ], [ '404 Not Found' ] ];
   };
   
   http_request(
@@ -590,6 +590,9 @@ subtest 'test forward' => sub {
     http_response {
       http_code 302;
       http_location '/foo/';
+      http_content_type 'text/plain';
+      http_content_type_charset 'UTF-8';
+      http_content 'Go To /foo/';
     },
   );
   
@@ -603,6 +606,8 @@ subtest 'test forward' => sub {
     http_response {
       http_code 200;
       http_content 'foo-text';
+      http_content_type 'text/plain';
+      http_content_type_charset 'UTF-8';
     },
   );
 
@@ -616,6 +621,8 @@ subtest 'test forward' => sub {
     http_response {
       http_code 200;
       http_content 'foo-text';
+      http_content_type 'text/plain';
+      http_content_type_charset 'UTF-8';
     },
   );
   
