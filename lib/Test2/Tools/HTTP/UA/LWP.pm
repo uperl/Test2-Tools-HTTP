@@ -31,6 +31,14 @@ sub instrument
 sub request
 {
   my($self, $req, %options) = @_;
+
+  if($self->apps->uri_to_app($req->uri) && $req->uri =~ /^\//)
+  {
+    $req->uri(
+      URI->new_abs($req->uri, $self->apps->base_url),
+    );
+  }
+
   my $res = $options{follow_redirects}
     ? $self->ua->request($req)
     : $self->ua->simple_request($req);
