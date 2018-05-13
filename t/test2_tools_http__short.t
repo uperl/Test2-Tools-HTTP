@@ -76,6 +76,7 @@ subtest 'x' => sub {
         field 'X-Foo' => 'Bar';
         etc;
       };
+      head 'x-foo' => 'Bar';
     }
   );
   

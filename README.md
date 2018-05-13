@@ -164,7 +164,48 @@ Checks that the response is NOT of the specified type.  See [HTTP::Status](https
     };
 
 Check the HTTP headers as converted into a Perl hash.  If the same header appears twice, then the values are joined together
-using the `,` character.
+using the `,` character.  Example:
+
+    http_request(
+      GET('http://example.test'),
+      http_response {
+        http_headers hash {
+          field 'Content-Type' => 'text/plain;charset=utf-8';
+          etc;
+        };
+      },
+    );
+
+### http\_header \[head\]
+
+    http_response {
+      http_header $name, $check;
+    };
+
+Check an HTTP header against the given check.  Can be used with either scalar or array checks.  In scalar mode,
+any list values will be joined with `,` character.  Example:
+
+    http_request(
+      GET('http://example.test'),
+      http_response {
+
+        # single value
+        http_header 'X-Foo', 'Bar';
+
+        # list as scalar, will match either:
+        #     X-Foo: A
+        #     X-Foo: B
+        # or 
+        #     X-Foo: A,B
+        http_header 'X-Foo', 'A,B';
+
+        # list mode, with an array ref:
+        http_header 'X-Foo', ['A','B'];
+
+        # list mode, with an array check:
+        http_header 'X-Foo', array { item 'A'; item 'B' };
+      },
+    );
 
 ### http\_content\_type \[content\_type\], http\_content\_type\_charset \[charset\]
 

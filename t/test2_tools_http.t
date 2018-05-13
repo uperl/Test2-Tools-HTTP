@@ -638,10 +638,10 @@ subtest 'headers' => sub {
       [
         'Content-Type' => 'text/plain;charset=utf-8',
         'Content-Length' => 3,
-        'X-Aaa-1' => 'This is a simple single header',
+        'x-Aaa-1' => 'This is a simple single header',
         'X-Bbb-1' => 'comma,separated,list',
         'X-Ccc-1' => 'line',
-        'X-Ccc-1' => 'separated',
+        'X-ccc-1' => 'separated',
         'X-Ccc-1' => 'list',
       ],
       [ "xx\n" ],
@@ -680,6 +680,66 @@ subtest 'headers' => sub {
         call pass => F();
       };
       etc;
+    },
+  );
+
+  is(
+    http_tx->res,
+    http_response {
+      http_header 'x-aaa-1' => 'This is a simple single header';
+      http_header 'x-bbb-1' => 'comma,separated,list';
+      http_header 'x-ccc-1' => 'line,separated,list';
+      http_header 'x-ddd-1' => DNE();
+    },
+  );
+
+  is(
+    intercept {
+      is(
+        http_tx->res,
+        http_response {
+          http_header 'x-aaa-1' => 'This is a simple sxngle header';
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    intercept {
+      is(
+        http_tx->res,
+        http_response {
+          http_header 'x-aaa-1' => DNE();
+        }
+      );
+    },
+    array {
+      event Ok => sub {
+        call pass => F();
+      };
+      etc;
+    },
+  );
+
+  is(
+    http_tx->res,
+    http_response {
+      http_header 'x-bbb-1' => [qw( comma separated list )];
+      http_header 'x-ccc-1' => [qw( line separated list )];
+    },
+  );
+
+  is(
+    http_tx->res,
+    http_response {
+      http_header 'x-bbb-1' => array { item $_ for qw( comma separated list ) };
+      http_header 'x-ccc-1' => array { item $_ for qw( line separated list ) };
     },
   );
 

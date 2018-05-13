@@ -20,12 +20,12 @@ our @EXPORT    = qw(
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
-  http_headers
+  http_headers http_header
 );
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers head
   )],
 );
 
@@ -34,6 +34,7 @@ our %EXPORT_GEN = (
   req     => sub { \&http_request },
   res     => sub { \&http_response },
   app     => sub { \&psgi_app_add },
+  head    => sub { \&http_header },
   charset => sub { \&http_content_type_charset },
   map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri tx headers ),
 );
@@ -417,7 +418,17 @@ sub http_isnt_server_error { _add_call('is_server_error', _F()) }
  };
 
 Check the HTTP headers as converted into a Perl hash.  If the same header appears twice, then the values are joined together
-using the C<,> character.
+using the C<,> character.  Example:
+
+ http_request(
+   GET('http://example.test'),
+   http_response {
+     http_headers hash {
+       field 'Content-Type' => 'text/plain;charset=utf-8';
+       etc;
+     };
+   },
+ );
 
 =cut
 
@@ -441,6 +452,65 @@ sub http_headers
       (\%headers, 1);
     },
     [DREF => 'headers'],
+    Test2::Compare::Wildcard->new(
+      expect => $expect,
+      @cmpargs,
+    ),
+  );
+}
+
+=head3 http_header [head]
+
+ http_response {
+   http_header $name, $check;
+ };
+
+Check an HTTP header against the given check.  Can be used with either scalar or array checks.  In scalar mode,
+any list values will be joined with C<,> character.  Example:
+
+ http_request(
+   GET('http://example.test'),
+   http_response {
+
+     # single value
+     http_header 'X-Foo', 'Bar';
+
+     # list as scalar, will match either:
+     #     X-Foo: A
+     #     X-Foo: B
+     # or 
+     #     X-Foo: A,B
+     http_header 'X-Foo', 'A,B';
+
+     # list mode, with an array ref:
+     http_header 'X-Foo', ['A','B'];
+
+     # list mode, with an array check:
+     http_header 'X-Foo', array { item 'A'; item 'B' };
+   },
+ );
+
+=cut
+
+sub http_header
+{
+  my($name, $expect) = @_;
+  my($build, @cmpargs) = _build;
+  $build->add_http_check(
+    sub {
+      my($res) = @_;
+      my @values = $res->header($name);
+      return (0,0) unless @values;
+      if(ref($expect) eq 'ARRAY' || eval { $expect->isa('Test2::Compare::Array') })
+      {
+        return ([map { split /,/, $_ } @values], 1);
+      }
+      else
+      {
+        return (join(',',@values),1);
+      }
+    },
+    [DREF => "header $name"],
     Test2::Compare::Wildcard->new(
       expect => $expect,
       @cmpargs,
