@@ -13,6 +13,7 @@ $modules{$_} = $_ for qw(
   ExtUtils::MakeMaker
   HTTP::Request
   HTTP::Request::Common
+  HTTP::Response
   Importer
   LWP::UserAgent
   Plack

@@ -250,11 +250,11 @@ so that it can be tested with [Test2::Tools::URL](https://metacpan.org/pod/Test2
 
 ## http\_tx \[tx\]
 
-    my $req  = http_tx->req;
-    my $res  = http_tx->res;
-    my $bool = http_tx->ok;
-    my $bool = http_tx->connection_error;
-    my $url  = http_tx->location;
+    my $req    = http_tx->req;
+    my $res    = http_tx->res;
+    my $bool   = http_tx->ok;
+    my $string = http_tx->connection_error;
+    my $url    = http_tx->location;
     http_tx->note;
     http_tx->diag;
 
@@ -269,8 +269,9 @@ related to the most recent `http_request`.
 
     The [HTTP::Response](https://metacpan.org/pod/HTTP::Response) object.
 
-    Warning: In the case of a connection error, this may be a synthetic response produced by [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent), rather
-    than an actual message from the remote end.
+    Warning: Depending on the user agent class in use, in the case of a connection error, this may be either a synthetic
+    response or not defined.  For example [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) produced a synthetic response, while [Mojo::UserAgent](https://metacpan.org/pod/Mojo::UserAgent) does not
+    produce a response in the event of a connection error.
 
 - http\_tx->ok
 
@@ -278,7 +279,7 @@ related to the most recent `http_request`.
 
 - http\_tx->connection\_error.
 
-    True if there was a connection error during the most recent `http_request`.
+    The connection error if any from the most recent `http_reequest`.
 
 - http\_tx->location
 

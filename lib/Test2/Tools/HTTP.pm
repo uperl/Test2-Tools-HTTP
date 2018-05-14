@@ -180,7 +180,7 @@ sub http_request
   if(my $error = $@)
   {
     $ok = 0;
-    $connection_error = 1;
+    $connection_error = "$error";
     push @diag, "$error";
     $res = eval { $error->res };
   }
@@ -199,8 +199,8 @@ sub http_request
   $ctx->release;
 
   $tx = bless {
-    req              => $req,
-    res              => $res,
+    req              => bless($req, 'Test2::Tools::HTTP::Tx::Request'),
+    res              => bless($res, 'Test2::Tools::HTTP::Tx::Response'),
     ok               => $ok,
     connection_error => $connection_error,
     location         => do {
@@ -683,11 +683,11 @@ sub http_location_uri
 
 =head2 http_tx [tx]
 
- my $req  = http_tx->req;
- my $res  = http_tx->res;
- my $bool = http_tx->ok;
- my $bool = http_tx->connection_error;
- my $url  = http_tx->location;
+ my $req    = http_tx->req;
+ my $res    = http_tx->res;
+ my $bool   = http_tx->ok;
+ my $string = http_tx->connection_error;
+ my $url    = http_tx->location;
  http_tx->note;
  http_tx->diag;
 
@@ -704,8 +704,9 @@ The L<HTTP::Request> object.
 
 The L<HTTP::Response> object.
 
-Warning: In the case of a connection error, this may be a synthetic response produced by L<LWP::UserAgent>, rather
-than an actual message from the remote end.
+Warning: Depending on the user agent class in use, in the case of a connection error, this may be either a synthetic
+response or not defined.  For example L<LWP::UserAgent> produced a synthetic response, while L<Mojo::UserAgent> does not
+produce a response in the event of a connection error.
 
 =item http_tx->ok
 
@@ -713,7 +714,7 @@ True if the most recent call to C<http_request> passed.
 
 =item http_tx->connection_error.
 
-True if there was a connection error during the most recent C<http_request>.
+The connection error if any from the most recent C<http_reequest>.
 
 =item http_tx->location
 
