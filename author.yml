@@ -24,4 +24,3 @@ pod_coverage:
     - Test2::Tools::HTTP::UA
     - Test2::Tools::HTTP::UA::LWP
     - Test2::Tools::HTTP::Apps
-    - Test2::Tools::HTTP::Tx
