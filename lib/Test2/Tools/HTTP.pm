@@ -184,6 +184,11 @@ sub http_request
     push @diag, "$error";
     $res = eval { $error->res };
   }
+  
+  if(defined $res)
+  {
+    bless($res, 'Test2::Tools::HTTP::Tx::Response'),
+  }
 
   if($ok && defined $check)
   {
@@ -200,7 +205,7 @@ sub http_request
 
   $tx = bless {
     req              => bless($req, 'Test2::Tools::HTTP::Tx::Request'),
-    res              => bless($res, 'Test2::Tools::HTTP::Tx::Response'),
+    res              => $res,
     ok               => $ok,
     connection_error => $connection_error,
     location         => do {
