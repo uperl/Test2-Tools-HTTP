@@ -1,7 +1,12 @@
 use Test2::V0 -no_srand => 1;
 sub require_ok ($);
 
+require_ok 'Test2::Require::Internet';
 require_ok 'Test2::Tools::HTTP';
+require_ok 'Test2::Tools::HTTP::Apps';
+require_ok 'Test2::Tools::HTTP::Tx';
+require_ok 'Test2::Tools::HTTP::UA';
+require_ok 'Test2::Tools::HTTP::UA::LWP';
 
 done_testing;
 
