@@ -346,6 +346,11 @@ Remove the app at the given (or default) URL.
     This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a [Mojolicious](https://metacpan.org/pod/Mojolicious) 
     app since it can be used (with [Test::Mojo::Role::PSGI](https://metacpan.org/pod/Test::Mojo::Role::PSGI)) to test any PSGI application.
 
+- [Plack::Test](https://metacpan.org/pod/Plack::Test)
+
+    Also allows you to make [HTTP::Request](https://metacpan.org/pod/HTTP::Request) requests against a [PSGI](https://metacpan.org/pod/PSGI) app and get the appropriate [HTTP::Response](https://metacpan.org/pod/HTTP::Response) response back.
+    Doesn't provide any special tools for interrogating that response.  This module in fact uses this one internally.
+
 - [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent)
 
     This is a sublcass of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) that can return responses from a local PSGI app, similar to the way this module instruments
