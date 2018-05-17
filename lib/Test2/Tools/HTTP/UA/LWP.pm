@@ -8,6 +8,39 @@ use parent 'Test2::Tools::HTTP::UA';
 # ABSTRACT: LWP user agent wrapper for Test2::Tools::HTTP
 # VERSION
 
+=head1 SYNOPSIS
+
+ use Test2::Tools::HTTP;
+ use LWP::UserAgent;
+ 
+ psgi_app_add 'http://example.test' => sub { ... };
+ 
+ my $ua = LWP::UserAgent->new;
+ http_ua $ua;
+ 
+ my $res = $ua->get('http://example.test');
+
+=head1 DESCRIPTION
+
+This class is not intended to be used directly.
+
+This module provides the machinery for instrumenting
+L<LWP::UserAgent> for use with L<Test2::Tools::HTTP>.
+Since L<LWP::UserAgent> is the default user agent for
+L<Test2::Tools::HTTP>, this is the default user agent
+wrapper as well.  It is a subclass of
+L<Test2::Tools::HTTP::UA>.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Test2::Tools::HTTP>
+
+=back
+
+=cut
+
 sub instrument
 {
   my($self) = @_;
