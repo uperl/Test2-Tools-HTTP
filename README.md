@@ -67,10 +67,16 @@ with short names:
 # DESCRIPTION
 
 This module provides an interface for testing websites and PSGI based apps with a [Test2](https://metacpan.org/pod/Test2) style comparisons interface.
-By default it uses long function names with either a `http_` or `psgi_app` prefix.  The intent is to make the module
-usable when you are importing lots of symbols from lots of different modules while reducing the chance of collisions.
-You can instead import `:short` which will give you the most commonly used tools with short names.  The short names
-are indicated below in square brackets, and were picked to not conflict with [Test2::V0](https://metacpan.org/pod/Test2::V0).
+You can specify a PSGI app with a URL and responses from that URL will automatically be routed to that app, without
+having to actually need a separate server process.  Requests to URLs that haven't been registered will be made
+against the actual networks servers as appropriate.  You can also use the user agent returned from `http_ua` to
+make requests against PSGI apps.  [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) is the user agent used by default, but it is possible to use
+others assuming an appropriate user agent wrapper class is available ([Test2::Tools::HTTP::UA](https://metacpan.org/pod/Test2::Tools::HTTP::UA)).
+
+By default it uses long function names with either a `http_` or `psgi_app_` prefix.  The intent is to make the module
+usable when you are importing lots of symbols from lots of different testing tools while reducing the chance of name 
+collisions.  You can instead import `:short` which will give you the most commonly used tools with short names. 
+The short names are indicated below in square brackets, and were chosen to not conflict with [Test2::V0](https://metacpan.org/pod/Test2::V0).
 
 # FUNCTIONS
 
@@ -337,8 +343,23 @@ Remove the app at the given (or default) URL.
 
 - [Test::Mojo](https://metacpan.org/pod/Test::Mojo)
 
-    This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a [Mojolicious](https://metacpan.org/pod/Mojolicious) app since it can be used
-    (with [Test::Mojo::Role::PSGI](https://metacpan.org/pod/Test::Mojo::Role::PSGI)) to test any PSGI application.
+    This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a [Mojolicious](https://metacpan.org/pod/Mojolicious) 
+    app since it can be used (with [Test::Mojo::Role::PSGI](https://metacpan.org/pod/Test::Mojo::Role::PSGI)) to test any PSGI application.
+
+- [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent)
+
+    This is a sublcass of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) that can return responses from a local PSGI app, similar to the way this module instruments
+    an instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) for similar purposes.  The limitation to this approach is that it cannot be used with classes which
+    cannot be used with subclasses of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent).  By contrast, this module can instrument an existing [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object
+    without having to rebless it into another class or other such shenanigans.  If you can at least get access to another class's user
+    agent instance, it can be used with [Test2::Tools::HTTP](https://metacpan.org/pod/Test2::Tools::HTTP)'s mock website system.  Doesn't work with anything that is not an
+    [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.
+
+- [LWP::Protocol::PSGI](https://metacpan.org/pod/LWP::Protocol::PSGI)
+
+    Provides a similar functionality to [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent), but registers apps globally with [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) so that you don't even
+    need access to a specific [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.  Also doesn't work with anything that is not an [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.  It
+    is worth reading the section "DIFFERENCES WITH OTHER MODULES" in this modules documentation before you decide which module to use.
 
 # AUTHOR
 
