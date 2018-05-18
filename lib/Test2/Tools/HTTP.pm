@@ -920,7 +920,7 @@ Doesn't provide any special tools for interrogating that response.  This module 
 
 =item L<Test::LWP::UserAgent>
 
-This is a sublcass of L<LWP::UserAgent> that can return responses from a local PSGI app, similar to the way this module instruments
+This is a subclass of L<LWP::UserAgent> that can return responses from a local PSGI app, similar to the way this module instruments
 an instance of L<LWP::UserAgent> for similar purposes.  The limitation to this approach is that it cannot be used with classes which
 cannot be used with subclasses of L<LWP::UserAgent>.  By contrast, this module can instrument an existing L<LWP::UserAgent> object
 without having to rebless it into another class or other such shenanigans.  If you can at least get access to another class's user
