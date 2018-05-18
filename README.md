@@ -353,7 +353,7 @@ Remove the app at the given (or default) URL.
 
 - [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent)
 
-    This is a sublcass of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) that can return responses from a local PSGI app, similar to the way this module instruments
+    This is a subclass of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) that can return responses from a local PSGI app, similar to the way this module instruments
     an instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) for similar purposes.  The limitation to this approach is that it cannot be used with classes which
     cannot be used with subclasses of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent).  By contrast, this module can instrument an existing [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object
     without having to rebless it into another class or other such shenanigans.  If you can at least get access to another class's user
