@@ -12,6 +12,7 @@ pod_spelling_system:
     - req
     - tx
     - ua
+    - rebless
 
 pod_coverage:
   skip: 0

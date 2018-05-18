@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - internal release
   - Add http_headers [headers]
   - Add http_Header [head]
 
