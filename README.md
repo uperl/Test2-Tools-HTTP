@@ -182,7 +182,7 @@ using the `,` character.  Example:
       },
     );
 
-### http\_header \[head\]
+### http\_header \[header\]
 
     http_response {
       http_header $name, $check;

@@ -5,8 +5,6 @@ use Test2::Tools::JSON::Pointer;
 use Test2::Require::Internet -tcp => [ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org', $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 80 ];
 use HTTP::Request::Common;
 
-skip_all 'need to rethink this';
-
 my $ret;
 
 http_base_url "http://@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org' ]}:@{[ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 80 ]}";

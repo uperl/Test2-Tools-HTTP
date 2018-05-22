@@ -17,7 +17,7 @@ use Carp ();
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers head
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers header
   )],
 );
 
@@ -37,10 +37,9 @@ our @EXPORT_OK = (
 *req     = \&http_request;
 *res     = \&http_response;
 *app     = \&psgi_app_add;
-*head    = \&http_header;
 *charset = \&http_content_type_charset;
 
-foreach my $short (qw( code message content content_type content_length content_length_ok location location_uri tx headers ))
+foreach my $short (qw( code message content content_type content_length content_length_ok location location_uri tx header headers ))
 {
   no strict 'refs';
   *{$short} = \&{"http_$short"};
@@ -477,7 +476,7 @@ sub http_headers
   );
 }
 
-=head3 http_header [head]
+=head3 http_header [header]
 
  http_response {
    http_header $name, $check;
