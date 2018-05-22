@@ -106,6 +106,10 @@ sub new
     {
       $class = 'Mojo';
     }
+    elsif(eval { $ua->isa('Net::Async::HTTP') })
+    {
+      $class = 'NetAsyncHTTP';
+    }
     
     if(defined $class)
     {
