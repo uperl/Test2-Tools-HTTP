@@ -89,7 +89,7 @@ sub new
     # Not all of these may even be implemented.
     if(ref($ua) eq '' && defined $ua)
     {
-      if($ua eq 'AnyEvent::HTTP';)
+      if($ua eq 'AnyEvent::HTTP')
       {
         $class = 'AE';
       }
