@@ -87,7 +87,14 @@ sub new
 
     # Not all of these may be installed.
     # Not all of these may even be implemented.
-    if(eval { $ua->isa('LWP::UserAgent') })
+    if(ref($ua) eq '' && defined $ua)
+    {
+      if($ua eq 'AnyEvent::HTTP';)
+      {
+        $class = 'AE';
+      }
+    }
+    elsif(eval { $ua->isa('LWP::UserAgent') })
     {
       $class = 'LWP';
     }
@@ -98,10 +105,6 @@ sub new
     elsif(eval { $ua->isa('Mojo::UserAgent') })
     {
       $class = 'Mojo';
-    }
-    elsif(eval { $ua->isa->('AnyEvent::HTTP') })
-    {
-      $class = 'AE';
     }
     
     if(defined $class)
