@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.04      2018-05-22 16:16:24 -0400
   - Remove dep on Inport for :short tag
   - Rename short name for http_header from head to header
     (in case we want to add a HTTP HEAD method later)
