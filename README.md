@@ -52,7 +52,7 @@ with short names:
     
     app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
     
-    req {
+    req (
       GET('/'),
       res {
         code 200;
@@ -60,7 +60,7 @@ with short names:
         content_type 'text/plain';
         content match qr/Test/;
       },
-    };
+    );
     
     done_testing;
 
