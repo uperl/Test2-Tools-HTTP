@@ -565,7 +565,7 @@ sub http_content_type
         ? ($content_type, 1)
         : ($content_type, 0);
     },
-    [DREF => 'content'],
+    [DREF => 'header content-type'],
     Test2::Compare::Wildcard->new(
       expect => $expect,
       @cmpargs,
@@ -585,7 +585,7 @@ sub http_content_type_charset
         ? ($charset, 1)
         : ($charset, 0);
     },
-    [DREF => 'content'],
+    [DREF => 'header content-type charset'],
     Test2::Compare::Wildcard->new(
       expect => $expect,
       @cmpargs,
