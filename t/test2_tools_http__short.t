@@ -1,6 +1,5 @@
-use Test2::Require::Module 'Importer';
 use Test2::V0 -no_srand => 1;
-use Importer 'Test2::Tools::HTTP' => ':short';
+use Test2::Tools::HTTP ':short';
 
 subtest 'imports' => sub {
   imported_ok 'ua';
@@ -20,7 +19,7 @@ subtest 'ua' => sub {
 subtest 'x' => sub {
 
   require HTTP::Request::Common;
-  my $get = Importer->get('HTTP::Request::Common' => 'GET')->{GET};
+  my $get = \&HTTP::Request::Common::GET;
 
   app 'http://x.test/' => sub {
     my $env = shift;

@@ -23,3 +23,15 @@ pod_coverage:
     - Test2::Tools::HTTP::UA#new
     - Test2::Tools::HTTP::Apps#new
     - Test2::Tools::HTTP::UA::LWP
+    - Test2::Tools::HTTP#app
+    - Test2::Tools::HTTP#charset
+    - Test2::Tools::HTTP#code
+    - Test2::Tools::HTTP#content
+    - Test2::Tools::HTTP#content_length
+    - Test2::Tools::HTTP#content_length_ok
+    - Test2::Tools::HTTP#content_type
+    - Test2::Tools::HTTP#head
+    - Test2::Tools::HTTP#location_uri
+    - Test2::Tools::HTTP#message
+    - Test2::Tools::HTTP#tx
+    - Test2::Tools::HTTP#ua

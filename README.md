@@ -47,7 +47,7 @@ Test HTTP / PSGI
 
 with short names:
 
-    use Importer 'Test2::Tools::HTTP' => ':short';
+    use Test2::Tools::HTTP ':short';
     use HTTP::Request::Common;
     
     app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };

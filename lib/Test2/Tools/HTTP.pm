@@ -15,6 +15,12 @@ use Test2::Tools::HTTP::Tx;
 use URI;
 use Carp ();
 
+our %EXPORT_TAGS = (
+  short => [qw(
+    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers head
+  )],
+);
+
 our @EXPORT    = qw( 
   http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_tx http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
@@ -23,21 +29,22 @@ our @EXPORT    = qw(
   http_headers http_header
 );
 
-our %EXPORT_TAGS = (
-  short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers head
-  )],
+our @EXPORT_OK = (
+  @{ $EXPORT_TAGS{'short'} },
 );
 
-our %EXPORT_GEN = (
-  ua      => sub { \&http_ua },
-  req     => sub { \&http_request },
-  res     => sub { \&http_response },
-  app     => sub { \&psgi_app_add },
-  head    => sub { \&http_header },
-  charset => sub { \&http_content_type_charset },
-  map { my $name = "http_$_"; $_ => sub { \&{$name} } } qw( code message content content_type content_length content_length_ok location location_uri tx headers ),
-);
+*ua      = \&http_ua;
+*req     = \&http_request;
+*res     = \&http_response;
+*app     = \&psgi_app_add;
+*head    = \&http_header;
+*charset = \&http_content_type_charset;
+
+foreach my $short (qw( code message content content_type content_length content_length_ok location location_uri tx headers ))
+{
+  no strict 'refs';
+  *{$short} = \&{"http_$short"};
+}
 
 # ABSTRACT: Test HTTP / PSGI
 # VERSION
@@ -87,7 +94,7 @@ our %EXPORT_GEN = (
 
 with short names:
 
- use Importer 'Test2::Tools::HTTP' => ':short';
+ use Test2::Tools::HTTP ':short';
  use HTTP::Request::Common;
  
  app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };

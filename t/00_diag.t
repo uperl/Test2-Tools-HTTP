@@ -14,7 +14,6 @@ $modules{$_} = $_ for qw(
   HTTP::Request
   HTTP::Request::Common
   HTTP::Response
-  Importer
   LWP::UserAgent
   Plack
   Test2::API
