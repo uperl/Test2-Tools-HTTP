@@ -9,6 +9,16 @@ use Carp ();
 
 =head1 SYNOPSIS
 
+Use a wrapper:
+
+ my $wrapper = Test2::Tools::HTTP::MyUAWrapper->new($ua);
+
+ # returns a HTTP::Response object
+ # or throws an error on a connection error
+ my $res = $wrapper->request($req);
+
+Write your own wrapper:
+
  package Test2::Tools::HTTP::UA::MyUAWrapper;
  
  use parent 'Test2::Tools::HTTP::UA';
@@ -74,6 +84,14 @@ interacts with L<Test2::Tools::HTTP>.  By default
 L<Test2::Tools::HTTP> uses L<LWP::UserAgent> and
 in turn uses L<Test2::Tools::HTTP::UA::LWP> as its
 user agent wrapper.
+
+=head1 CONSTRUCTOR
+
+=head2 new
+
+ my $wrapper = Test2::Tools::HTTP::UA->new($ua);
+
+Creates a new wrapper.
 
 =cut
 
