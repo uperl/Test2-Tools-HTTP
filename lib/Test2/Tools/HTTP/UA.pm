@@ -79,7 +79,7 @@ user agent wrapper.
 
 sub new
 {
-  my($class, $ua, $apps) = @_;  
+  my($class, $ua) = @_;  
   
   if($class eq __PACKAGE__)
   {
@@ -118,7 +118,7 @@ sub new
       $pm =~ s/::/\//g;
       $pm .= ".pm";
       require $pm;
-      return $class->new($ua, $apps);
+      return $class->new($ua);
     }
     else
     {
@@ -128,7 +128,6 @@ sub new
   
   bless {
     ua   => $ua,
-    apps => $apps,
   }, $class;
 }
 
@@ -153,16 +152,23 @@ sub ua
 =head2 apps
 
  my $apps = $wrapper->apps;
+ my $apps = Test2::Tools::HTTP::UA->apps;
 
 This returns an instance of L<Test2::Tools::HTTP::Apps> used
 by your wrapper.  It can be used to lookup PSGI apps by
 url.
 
+Because the apps object is a singleton, you may also call this
+as a class method.
+
 =cut
+
+my $apps;
 
 sub apps
 {
-  shift->{apps};
+  require Test2::Tools::HTTP::Apps;
+  $apps ||= Test2::Tools::HTTP::Apps->new;
 }
 
 =head2 error

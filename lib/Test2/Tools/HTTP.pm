@@ -151,7 +151,7 @@ This allows the user agent to follow redirects.
 =cut
 
 my $tx;
-my $apps = Test2::Tools::HTTP::Apps->new;
+my $apps = Test2::Tools::HTTP::UA->apps;
 my $ua_wrapper;
 
 sub http_request
@@ -802,7 +802,7 @@ sub http_ua
 
   if($new)
   {
-    $ua_wrapper = Test2::Tools::HTTP::UA->new($new, $apps);
+    $ua_wrapper = Test2::Tools::HTTP::UA->new($new);
     $ua_wrapper->instrument;
   }
 
