@@ -87,4 +87,6 @@ sub request
   $res;
 }
 
+__PACKAGE__->register('LWP::UserAgent', 'instance');
+
 1;

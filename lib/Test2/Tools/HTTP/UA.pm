@@ -3,6 +3,7 @@ package Test2::Tools::HTTP::UA;
 use strict;
 use warnings;
 use Carp ();
+use File::Spec ();
 
 # ABSTRACT: User agent wrapper for Test2::Tools::HTTP
 # VERSION
@@ -73,6 +74,8 @@ Write your own wrapper:
    
    $res;
  }
+ 
+ __PACKAGE__->register('MyUA', 'instance');
 
 =head1 DESCRIPTION
 
@@ -95,47 +98,57 @@ Creates a new wrapper.
 
 =cut
 
+sub _init
+{
+  foreach my $inc (@INC)
+  {
+    my $dir = File::Spec->catdir($inc, 'Test2/Tools/HTTP/UA');
+    next unless -d $dir;
+    my $dh;
+    opendir $dh, $dir;
+    my @list = sort grep !/^\./, grep /\.pm$/, readdir $dh;
+    closedir $dh;
+    foreach my $pm (@list)
+    {
+      eval { require "Test2/Tools/HTTP/UA/$pm"; };
+      if(my $error = $@)
+      {
+        warn $error;
+      }
+    }
+  }
+}
+
+my %classes;
+my %instance;
+
 sub new
 {
   my($class, $ua) = @_;  
+
+  _init();
   
   if($class eq __PACKAGE__)
   {
     my $class;
 
-    # Not all of these may be installed.
-    # Not all of these may even be implemented.
     if(ref($ua) eq '' && defined $ua)
     {
-      if($ua eq 'AnyEvent::HTTP')
+      ($class) = @{ $classes{$ua} };
+    }
+    else
+    {
+      foreach my $try (keys %instance)
       {
-        $class = 'AE';
+        if(eval { $ua->isa($try) })
+        {
+          ($class) = @{ $instance{$try} };
+        }
       }
-    }
-    elsif(eval { $ua->isa('LWP::UserAgent') })
-    {
-      $class = 'LWP';
-    }
-    elsif(eval { $ua->isa('HTTP::Tiny') })
-    {
-      $class = 'HTTPTiny';
-    }
-    elsif(eval { $ua->isa('Mojo::UserAgent') })
-    {
-      $class = 'Mojo';
-    }
-    elsif(eval { $ua->isa('Net::Async::HTTP') })
-    {
-      $class = 'NetAsyncHTTP';
     }
     
     if(defined $class)
     {
-      $class = "Test2::Tools::HTTP::UA::$class";
-      my $pm = $class;
-      $pm =~ s/::/\//g;
-      $pm .= ".pm";
-      require $pm;
       return $class->new($ua);
     }
     else
@@ -213,6 +226,35 @@ sub error
   my(undef, $message, $res) = @_;
   my $error = bless { message => $message, res => $res }, 'Test2::Tools::HTTP::UA::Error';
   die $error;
+}
+
+=head2 register
+
+ Test2::Tools::HTTP::UA->register($class, $type);
+
+Register your wrapper class with L<Test2::Tools::HTTP::UA>.
+C<$class> is the user agent class.  C<$type> is either
+C<class> for classes or C<instance> for instances, meaning
+your wrapper works with a class or an instance object.
+
+=cut
+
+sub register
+{
+  my(undef, $class, $type) = @_;
+  my $caller = caller;
+  if($type eq 'class')
+  {
+    push @{ $classes{$class} }, $caller;
+  }
+  elsif($type eq 'instance')
+  {
+    push @{ $instance{$class} }, $caller;
+  }
+  else
+  {
+    Carp::croak("unknown type for $class: $type");
+  }
 }
 
 package Test2::Tools::HTTP::UA::Error;

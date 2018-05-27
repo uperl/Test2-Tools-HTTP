@@ -1,6 +1,11 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Allow UA wrapper classes to register for arbitrary
+    UA classes/instances
+  - Wrapper constructor is no longer private
+  - The apps method on wrapper is now a class rather than
+    instance method
 
 0.04      2018-05-22 16:16:24 -0400
   - Remove dep on Inport for :short tag
