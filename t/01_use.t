@@ -7,6 +7,7 @@ require_ok 'Test2::Tools::HTTP::Apps';
 require_ok 'Test2::Tools::HTTP::Tx';
 require_ok 'Test2::Tools::HTTP::UA';
 require_ok 'Test2::Tools::HTTP::UA::LWP';
+require_ok 'Test2::Tools::HTTP::UA::LWPClass';
 
 done_testing;
 

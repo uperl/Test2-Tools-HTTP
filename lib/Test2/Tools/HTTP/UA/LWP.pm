@@ -37,6 +37,8 @@ L<Test2::Tools::HTTP::UA>.
 
 =item L<Test2::Tools::HTTP>
 
+=item L<Test2::Tools::HTTP::UA::LWPClass>
+
 =back
 
 =cut

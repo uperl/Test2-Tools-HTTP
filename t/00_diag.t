@@ -11,9 +11,11 @@ my $post_diag;
 
 $modules{$_} = $_ for qw(
   ExtUtils::MakeMaker
+  HTTP::Message::PSGI
   HTTP::Request
   HTTP::Request::Common
   HTTP::Response
+  LWP::Protocol
   LWP::UserAgent
   Plack
   Test2::API
