@@ -107,7 +107,7 @@ sub request
   if(my $app = $self->apps->uri_to_app($req->uri))
   {
     my $env = req_to_psgi $req;
-    my $res = res_from_psgi $app;
+    my $res = res_from_psgi $app->($env);
     my $content = $res->content;
     $res->content('');
     return $self->collect_once($arg, $res, $content);

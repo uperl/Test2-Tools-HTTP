@@ -126,10 +126,9 @@ sub new
 {
   my($class, $ua) = @_;  
 
-  _init();
-  
   if($class eq __PACKAGE__)
   {
+    _init();
     my $class;
 
     if(ref($ua) eq '' && defined $ua)
