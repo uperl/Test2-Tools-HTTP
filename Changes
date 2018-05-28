@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Added Test2::Tools::HTTP::UA::LWPClass
   - Allow UA wrapper classes to register for arbitrary
     UA classes/instances
   - Wrapper constructor is no longer private
