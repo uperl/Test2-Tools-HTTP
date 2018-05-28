@@ -21,7 +21,7 @@ subtest 'x' => sub {
   require HTTP::Request::Common;
   my $get = \&HTTP::Request::Common::GET;
 
-  app 'http://x.test/' => sub {
+  app_add 'http://x.test/' => sub {
     my $env = shift;
     if($env->{PATH_INFO} eq '/foo')
     {

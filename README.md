@@ -50,7 +50,7 @@ with short names:
     use Test2::Tools::HTTP ':short';
     use HTTP::Request::Common;
     
-    app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
+    app_add { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
     
     req (
       GET('/'),
@@ -324,7 +324,7 @@ then localhost with a random unused port will be picked.
 Gets/sets the [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object used to make requests against real web servers.  For tests against a PSGI app, this will NOT be used.
 If not provided, the default [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) will call `env_proxy` and add an in-memory cookie jar.
 
-## psgi\_app\_add \[app\]
+## psgi\_app\_add \[app\_add\]
 
     psgi_app_add $app;
     psgi_app_add $url, $app;

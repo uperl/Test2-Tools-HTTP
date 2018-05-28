@@ -17,7 +17,7 @@ use Carp ();
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers header
+    app_add req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers header
   )],
 );
 
@@ -36,7 +36,7 @@ our @EXPORT_OK = (
 *ua      = \&http_ua;
 *req     = \&http_request;
 *res     = \&http_response;
-*app     = \&psgi_app_add;
+*app_add = \&psgi_app_add;
 *charset = \&http_content_type_charset;
 
 foreach my $short (qw( code message content content_type content_length content_length_ok location location_uri tx header headers ))
@@ -96,7 +96,7 @@ with short names:
  use Test2::Tools::HTTP ':short';
  use HTTP::Request::Common;
  
- app { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
+ app_add { [ 200, [ 'Content-Type => 'text/plain' ], [ "Test Document\n" ] ] };
  
  req (
    GET('/'),
@@ -809,7 +809,7 @@ sub http_ua
   $ua_wrapper->ua;
 }
 
-=head2 psgi_app_add [app]
+=head2 psgi_app_add [app_add]
 
  psgi_app_add $app;
  psgi_app_add $url, $app;

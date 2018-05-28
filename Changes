@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Rename short version of psgi_app_add from app to app_add
+    to avoid conflicting with Mojolicious::Lite
 
 0.05      2018-05-27 21:14:20 -0400
   - Added Test2::Tools::HTTP::UA::LWPClass
