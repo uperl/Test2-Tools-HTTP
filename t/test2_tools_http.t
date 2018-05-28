@@ -747,4 +747,90 @@ subtest 'headers' => sub {
 
 };
 
+subtest 'psgi_app_guard' => sub {
+
+  psgi_app_add sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ "Original Default App\n" ] ] };
+  psgi_app_add 'http://other.test' =>   sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ "Original Other App\n" ] ] };
+
+  subtest 'void contet' => sub {
+  
+    eval { psgi_app_guard; };
+    my $error = $@;
+    like $error, qr/psgi_app_guard called in void context/;
+    note $error if $error;
+  
+  };
+  
+  subtest 'before' => sub {
+  
+    http_request
+      GET('/'),
+      http_response {
+        http_content "Original Default App\n";
+      };
+
+    http_request
+      GET('http://other.test'),
+      http_response {
+        http_content "Original Other App\n";
+      };
+  
+  };
+
+  subtest 'override default' => sub {
+  
+    my $guard = psgi_app_guard sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ "Override Default App\n" ] ] };
+  
+    http_request
+      GET('/'),
+      http_response {
+        http_content "Override Default App\n";
+      };
+
+  };
+
+  subtest 'override other' => sub {
+  
+    my $guard = psgi_app_guard 'http://other.test' => sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ "Override Other App\n" ] ] };
+  
+    http_request
+      GET('http://other.test'),
+      http_response {
+        http_content "Override Other App\n";
+      };
+
+  };
+  
+  subtest 'override nothing' => sub {
+  
+    my $guard = psgi_app_guard 'http://nothing.test' => sub { [ 200, [ 'Content-Type' => 'text/plain' ], [ "Nothing\n" ] ] };
+
+    http_request
+      GET('http://nothing.test'),
+      http_response {
+        http_content "Nothing\n";
+      };
+  
+  };
+
+  subtest 'after' => sub {
+  
+    http_request
+      GET('/'),
+      http_response {
+        http_content "Original Default App\n";
+      };
+
+    http_request
+      GET('http://other.test'),
+      http_response {
+        http_content "Original Other App\n";
+      };
+  
+  };
+  
+  psgi_app_del;
+
+};
+
 done_testing

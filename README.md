@@ -347,7 +347,49 @@ Remove the app at the given (or default) URL.
 
 Similar to `psgi_app_add` except a guard object is returned.
 When the guard object falls out of scope, the old apps are
-restored automatically.
+restored automatically.  The intent is for this to be used
+in subtests or other scoped blocks to temporarily override
+the internet or other PSGI apps.
+
+    psgi_add_add 'http://foo.test' => sub { ... };
+    
+    subtest 'mysubtest' => sub {
+      my $guard = psgi_app_guard 
+        'http://foo.test' => sub { ... },
+        'https://www.google.com' => sub { ... };
+        
+      http_request
+        # gets the foo.test for this scope.
+        GET('http://foo.test'),
+        http_response {
+          ...
+        };
+      
+      http_request
+        # gets the mock google
+        GET('https://www.google.com'),
+        http_response {
+          ...;
+        };
+    };
+    
+    http_request
+      # gets the original foo.test mock
+      GET('http://foo.test'),
+      http_response {
+        ...;
+      };
+    
+    http_request
+      # gets the real google
+      GET('https://www.google.com'),
+      http_response {
+        ...;
+      };
+
+Because calling a function that returns a guard in void context
+is usually a mistake, this function will throw an exception if you
+attempt to call it in void context.
 
 # SEE ALSO
 

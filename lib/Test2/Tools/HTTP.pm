@@ -27,6 +27,7 @@ our @EXPORT    = qw(
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
   http_content_type http_content_type_charset http_content_length http_content_length_ok http_location http_location_uri
   http_headers http_header
+  psgi_app_guard
 );
 
 our @EXPORT_OK = (
@@ -851,7 +852,49 @@ sub psgi_app_del
 
 Similar to C<psgi_app_add> except a guard object is returned.
 When the guard object falls out of scope, the old apps are
-restored automatically.
+restored automatically.  The intent is for this to be used
+in subtests or other scoped blocks to temporarily override
+the internet or other PSGI apps.
+
+ psgi_add_add 'http://foo.test' => sub { ... };
+ 
+ subtest 'mysubtest' => sub {
+   my $guard = psgi_app_guard 
+     'http://foo.test' => sub { ... },
+     'https://www.google.com' => sub { ... };
+     
+   http_request
+     # gets the foo.test for this scope.
+     GET('http://foo.test'),
+     http_response {
+       ...
+     };
+   
+   http_request
+     # gets the mock google
+     GET('https://www.google.com'),
+     http_response {
+       ...;
+     };
+ };
+ 
+ http_request
+   # gets the original foo.test mock
+   GET('http://foo.test'),
+   http_response {
+     ...;
+   };
+ 
+ http_request
+   # gets the real google
+   GET('https://www.google.com'),
+   http_response {
+     ...;
+   };
+
+Because calling a function that returns a guard in void context
+is usually a mistake, this function will throw an exception if you
+attempt to call it in void context.
 
 =cut
 
@@ -859,12 +902,14 @@ sub psgi_app_guard
 {
   my(%h) = @_ == 1 ? (http_base_url, @_) : (@_);
   
+  Carp::croak "psgi_app_guard called in void context" unless defined wantarray;
+  
   my %save;
   my $apps = Test2::Tools::HTTP::Apps->new;
   
   foreach my $url (keys %h)
   {
-    my $old = $apps->url_to_apps($url) || 1;
+    my $old = $apps->uri_to_app($url) || 1;
     my $new = $h{$url};
     $save{$url} = $old;
     $apps->del_psgi($url) if ref $old;
