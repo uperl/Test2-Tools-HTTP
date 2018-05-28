@@ -843,6 +843,66 @@ sub psgi_app_del
   return;
 }
 
+=head2 psgi_app_guard
+
+ my $guard = psgi_app_guard $app;
+ my $guard = psgi_app_guard $url, $app;
+ my $guard = psgi_app_guard $url, $app, ...;
+
+Similar to C<psgi_app_add> except a guard object is returned.
+When the guard object falls out of scope, the old apps are
+restored automatically.
+
+=cut
+
+sub psgi_app_guard
+{
+  my(%h) = @_ == 1 ? (http_base_url, @_) : (@_);
+  
+  my %save;
+  my $apps = Test2::Tools::HTTP::Apps->new;
+  
+  foreach my $url (keys %h)
+  {
+    my $old = $apps->url_to_apps($url) || 1;
+    my $new = $h{$url};
+    $save{$url} = $old;
+    $apps->del_psgi($url) if ref $old;
+    $apps->add_psgi($url => $new);
+  }
+  
+  Test2::Tools::HTTP::Guard->new(%save);
+}
+
+package Test2::Tools::HTTP::Guard;
+
+sub new
+{
+  my($class, %save) = @_;
+  bless \%save, $class;
+}
+
+sub restore
+{
+  my($self) = @_;
+  
+  my $apps = Test2::Tools::HTTP::Apps->new;
+  
+  foreach my $url (keys %$self)
+  {
+    my $app = $self->{$url};
+    $apps->del_psgi($url);
+    $apps->add_psgi($url => $app)
+      if ref $app;
+  }
+}
+
+sub DESTROY
+{
+  my($self) = @_;
+  $self->restore;
+}
+
 package Test2::Tools::HTTP::ResponseCompare;
 
 use parent 'Test2::Compare::Object';

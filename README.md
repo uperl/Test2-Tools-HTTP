@@ -339,6 +339,16 @@ instead of making a real HTTP request via [LWP::UserAgent](https://metacpan.org/
 
 Remove the app at the given (or default) URL.
 
+## psgi\_app\_guard
+
+    my $guard = psgi_app_guard $app;
+    my $guard = psgi_app_guard $url, $app;
+    my $guard = psgi_app_guard $url, $app, ...;
+
+Similar to `psgi_app_add` except a guard object is returned.
+When the guard object falls out of scope, the old apps are
+restored automatically.
+
 # SEE ALSO
 
 - [Test::Mojo](https://metacpan.org/pod/Test::Mojo)

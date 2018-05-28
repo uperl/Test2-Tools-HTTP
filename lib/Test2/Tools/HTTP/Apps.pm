@@ -17,16 +17,26 @@ C<psgi_app_add> method.  It is used by a user agent wrapper
 (L<Test2::Tools::HTTP::UA>) class to dispatch requests to
 the correct PSGI app.
 
+=head1 CONSTRUCTOR
+
+=head2 new
+
+ my $apps = Test2::Tools::HTTP::Apps->new;
+
+This class is a singleton, so this always returns the same
+instance.
+
 =cut
 
-sub new
 {
-  my($class) = @_;
-  
-  bless {
-    psgi     => {},
-    base_url => undef,
-  }, $class;
+  my $self;
+  sub new
+  {
+    $self ||= bless {
+      psgi     => {},
+      base_url => undef,
+    }, __PACKAGE__;
+  }
 }
 
 =head1 METHODS

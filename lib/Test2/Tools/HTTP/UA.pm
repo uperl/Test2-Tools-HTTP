@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp ();
 use File::Spec ();
+use Test2::Tools::HTTP::Apps;
 
 # ABSTRACT: User agent wrapper for Test2::Tools::HTTP
 # VERSION
@@ -193,12 +194,9 @@ as a class method.
 
 =cut
 
-my $apps;
-
 sub apps
 {
-  require Test2::Tools::HTTP::Apps;
-  $apps ||= Test2::Tools::HTTP::Apps->new;
+  Test2::Tools::HTTP::Apps->new;
 }
 
 =head2 error
