@@ -414,9 +414,12 @@ attempt to call it in void context.
 
 - [LWP::Protocol::PSGI](https://metacpan.org/pod/LWP::Protocol::PSGI)
 
-    Provides a similar functionality to [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent), but registers apps globally with [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) so that you don't even
-    need access to a specific [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.  Also doesn't work with anything that is not an [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.  It
-    is worth reading the section "DIFFERENCES WITH OTHER MODULES" in this modules documentation before you decide which module to use.
+    Provides a similar functionality to [Test::LWP::UserAgent](https://metacpan.org/pod/Test::LWP::UserAgent), but registers apps globally using [LWP::Protocol](https://metacpan.org/pod/LWP::Protocol) so that you do not
+    need access to a specific [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.  Does not work with anything that is not an [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) object.
+    [Test2::Tools::HTTP::UA](https://metacpan.org/pod/Test2::Tools::HTTP::UA) provides similar functionality, but is an abstraction layer which can be used with any appropriately
+    adapted user agent class or instance, although we use [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) by default.  Support for [Mojo::UserAgent](https://metacpan.org/pod/Mojo::UserAgent) and [HTTP::AnyUA](https://metacpan.org/pod/HTTP::AnyUA)
+    is available, although not bundled with this distribution.  One advantage of this abstraction is that it
+    can be used to instrument either a single instance or all objects belonging to a particular class.
 
 # AUTHOR
 
