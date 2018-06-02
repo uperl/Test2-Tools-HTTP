@@ -11,6 +11,7 @@ my $post_diag;
 
 $modules{$_} = $_ for qw(
   ExtUtils::MakeMaker
+  HTTP::Message
   HTTP::Message::PSGI
   HTTP::Request
   HTTP::Request::Common
