@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.07      2018-06-02 06:48:07 -0400
+  - First CPAN release
+
 0.06      2018-05-29 19:33:09 -0400
   - Rename short version of psgi_app_add from app to app_add
     to avoid conflicting with Mojolicious::Lite
