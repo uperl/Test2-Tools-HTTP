@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Fix compatability with latest version of Test2::Suite (gh#1)
 
 0.08      2018-06-02 15:47:39 -0400
   - Require HTTP::Message 6.07 for API reasons
