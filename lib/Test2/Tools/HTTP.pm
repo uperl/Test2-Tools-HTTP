@@ -21,7 +21,7 @@ our %EXPORT_TAGS = (
   )],
 );
 
-our @EXPORT    = qw( 
+our @EXPORT    = qw(
   http_request http_ua http_base_url psgi_app_add psgi_app_del http_response http_code http_message http_content http_tx http_is_success
   http_is_info http_is_success http_is_redirect http_is_error http_is_client_error http_is_server_error
   http_isnt_info http_isnt_success http_isnt_redirect http_isnt_error http_isnt_client_error http_isnt_server_error
@@ -69,14 +69,14 @@ foreach my $short (qw( code message content content_type content_length content_
      # http_response {} is a subclass of object {}
      # for HTTP::Response objects only, so you can
      # also use object {} style comparisons:
-     call code => 200; 
-
+     call code => 200;
+ 
      http_content_type match qr/^text\/(html|plain)$/;
      http_content_type_charset 'UTF-8';
      http_content match qr/Test/;
    }
  );
-
+ 
  use Test2::Tools::JSON::Pointer;
  
  # test an external website
@@ -121,8 +121,8 @@ make requests against PSGI apps.  L<LWP::UserAgent> is the user agent used by de
 others assuming an appropriate user agent wrapper class is available (L<Test2::Tools::HTTP::UA>).
 
 By default it uses long function names with either a C<http_> or C<psgi_app_> prefix.  The intent is to make the module
-usable when you are importing lots of symbols from lots of different testing tools while reducing the chance of name 
-collisions.  You can instead import C<:short> which will give you the most commonly used tools with short names. 
+usable when you are importing lots of symbols from lots of different testing tools while reducing the chance of name
+collisions.  You can instead import C<:short> which will give you the most commonly used tools with short names.
 The short names are indicated below in square brackets, and were chosen to not conflict with L<Test2::V0>.
 
 =head1 FUNCTIONS
@@ -197,7 +197,7 @@ sub http_request
     push @diag, "$error";
     $res = eval { $error->res };
   }
-  
+
   if(defined $res)
   {
     bless($res, 'Test2::Tools::HTTP::Tx::Response'),
@@ -489,20 +489,20 @@ any list values will be joined with C<,> character.  Example:
  http_request(
    GET('http://example.test'),
    http_response {
-
+ 
      # single value
      http_header 'X-Foo', 'Bar';
-
+ 
      # list as scalar, will match either:
      #     X-Foo: A
      #     X-Foo: B
-     # or 
+     # or
      #     X-Foo: A,B
      http_header 'X-Foo', 'A,B';
-
+ 
      # list mode, with an array ref:
      http_header 'X-Foo', ['A','B'];
-
+ 
      # list mode, with an array check:
      http_header 'X-Foo', array { item 'A'; item 'B' };
    },
@@ -675,7 +675,7 @@ sub http_location
     Test2::Compare::Wildcard->new(
       expect => $expect,
       @cmpargs,
-    ),    
+    ),
   );
 }
 
@@ -695,7 +695,7 @@ sub http_location_uri
     Test2::Compare::Wildcard->new(
       expect => $expect,
       @cmpargs,
-    ),    
+    ),
   );
 }
 
@@ -776,7 +776,7 @@ then localhost with a random unused port will be picked.
 
 sub http_base_url
 {
-  my($new) = @_;  
+  my($new) = @_;
   $apps->base_url($new);
 }
 
@@ -859,17 +859,17 @@ the internet or other PSGI apps.
  psgi_add_add 'http://foo.test' => sub { ... };
  
  subtest 'mysubtest' => sub {
-   my $guard = psgi_app_guard 
+   my $guard = psgi_app_guard
      'http://foo.test' => sub { ... },
      'https://www.google.com' => sub { ... };
-     
+ 
    http_request
      # gets the foo.test for this scope.
      GET('http://foo.test'),
      http_response {
        ...
      };
-   
+ 
    http_request
      # gets the mock google
      GET('https://www.google.com'),
@@ -901,12 +901,12 @@ attempt to call it in void context.
 sub psgi_app_guard
 {
   my(%h) = @_ == 1 ? (http_base_url, @_) : (@_);
-  
-  Carp::croak "psgi_app_guard called in void context" unless defined wantarray;
-  
+
+  Carp::croak "psgi_app_guard called in void context" unless defined wantarray;  ## no critic (Freenode::Wantarray)
+
   my %save;
   my $apps = Test2::Tools::HTTP::Apps->new;
-  
+
   foreach my $url (keys %h)
   {
     my $old = $apps->uri_to_app($url) || 1;
@@ -915,7 +915,7 @@ sub psgi_app_guard
     $apps->del_psgi($url) if ref $old;
     $apps->add_psgi($url => $new);
   }
-  
+
   Test2::Tools::HTTP::Guard->new(%save);
 }
 
@@ -930,9 +930,9 @@ sub new
 sub restore
 {
   my($self) = @_;
-  
+
   my $apps = Test2::Tools::HTTP::Apps->new;
-  
+
   foreach my $url (keys %$self)
   {
     my $app = $self->{$url};
@@ -1021,7 +1021,7 @@ sub deltas
 
 =item L<Test::Mojo>
 
-This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a L<Mojolicious> 
+This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a L<Mojolicious>
 app since it can be used (with L<Test::Mojo::Role::PSGI>) to test any PSGI application.
 
 =item L<Plack::Test>

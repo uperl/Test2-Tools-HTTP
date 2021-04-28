@@ -46,10 +46,10 @@ L<Test2::Tools::HTTP::UA>.
 sub instrument
 {
   my($self) = @_;
-  
+
   my $cb = $self->{request_send_cb} ||= sub {
     my($req, $ua, $h) = @_;
-    
+
     if(my $tester = $self->apps->uri_to_tester($req->uri))
     {
       return $tester->request($req);
@@ -59,7 +59,7 @@ sub instrument
       return;
     }
   };
-  
+
   $self->ua->set_my_handler( 'request_send' => $cb );
 }
 

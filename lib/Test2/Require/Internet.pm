@@ -27,7 +27,7 @@ This test requirement will skip your test if either
 
 =item The environment variable C<NO_NETWORK_TESTING> is set to a true value
 
-=item A connection to a particular host/port cannot be made.  The default is usually reasonable, but subject to change as the author sees fit. 
+=item A connection to a particular host/port cannot be made.  The default is usually reasonable, but subject to change as the author sees fit.
 
 =back
 
@@ -45,7 +45,7 @@ sub skip
   {
     my $host = shift @pairs;
     my $port = shift @pairs;
-    
+
     my $sock = IO::Socket::INET->new(
       PeerAddr => $host,
       PeerPort => $port,

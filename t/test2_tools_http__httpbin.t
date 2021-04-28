@@ -4,6 +4,7 @@ use Test2::Tools::HTTP;
 use Test2::Tools::JSON::Pointer;
 use Test2::Require::Internet -tcp => [ $ENV{TEST2_TOOLS_HTTP_HTTPBIN_HOST} || 'httpbin.org', $ENV{TEST2_TOOLS_HTTP_HTTPBIN_PORT} || 80 ];
 use HTTP::Request::Common;
+use List::SomeUtils qw( any );
 
 my $ret;
 
@@ -213,7 +214,7 @@ note "decodable = $_" for HTTP::Message::decodable();
 
 subtest 'gzip' => sub {
 
-  skip_all 'test requires gzip decoding' unless grep /gzip/, HTTP::Message::decodable;
+  skip_all 'test requires gzip decoding' unless any { /gzip/ } HTTP::Message::decodable;
 
   http_request(
     GET('/gzip'),

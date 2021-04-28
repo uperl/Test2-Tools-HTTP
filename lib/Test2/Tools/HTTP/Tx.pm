@@ -85,7 +85,7 @@ sub _note_or_diag
     $ctx->$method($self->res->decoded_content || $self->res->content);
   }
   $ctx->$method("ok = " . $self->ok);
-  
+
   $ctx->release;
 }
 
@@ -161,17 +161,17 @@ You cannot add helpers that replace existing methods.
 sub add_helper
 {
   my(undef, $sig, $code) = @_;
-  
+
   my($class, $name) = split /\./, $sig;
-  
+
   my %class = (
     tx => 'Test2::Tools::HTTP::Tx',
     req => 'Test2::Tools::HTTP::Tx::Request',
     res => 'Test2::Tools::HTTP::Tx::Response',
   );
-  
+
   $class = $class{lc $class} if $class{lc $class};
-  
+
   Carp::croak("$class already can $name") if $class->can($name);
 
   no strict 'refs';
