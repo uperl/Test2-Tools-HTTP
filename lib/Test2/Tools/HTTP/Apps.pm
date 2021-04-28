@@ -12,7 +12,7 @@ use URI;
 =head1 DESCRIPTION
 
 This acts as a container for zero or more PSGI applications
-that have been added using L<Test2::Tools::HTTP>'s 
+that have been added using L<Test2::Tools::HTTP>'s
 C<psgi_app_add> method.  It is used by a user agent wrapper
 (L<Test2::Tools::HTTP::UA>) class to dispatch requests to
 the correct PSGI app.
@@ -105,12 +105,12 @@ It is an instance of L<URI>.
 sub base_url
 {
   my($self, $new) = @_;
-  
+
   if($new)
   {
     $self->{base_url} = ref $new ? $new : URI->new($new);
   }
-  
+
   unless(defined $self->{base_url})
   {
     $self->{base_url} = URI->new('http://localhost/');
@@ -155,7 +155,7 @@ sub uri_to_tester
   my $key = $self->uri_key($url);
   my $app = $self->{psgi}->{$key}->{app};
   return unless $app;
-  
+
   $self->{psgi}->{$key}->{tester} ||= do {
     require Plack::Test;
     Plack::Test->create($app);

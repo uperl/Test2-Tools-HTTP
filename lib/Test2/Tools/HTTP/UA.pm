@@ -14,7 +14,7 @@ use Test2::Tools::HTTP::Apps;
 Use a wrapper:
 
  my $wrapper = Test2::Tools::HTTP::MyUAWrapper->new($ua);
-
+ 
  # returns a HTTP::Response object
  # or throws an error on a connection error
  my $res = $wrapper->request($req);
@@ -30,7 +30,7 @@ Write your own wrapper:
    my($self) = @_;
    my $ua = $self->ua;  # the user agent object
    my $apps = $self->apps;
-
+ 
    # instrument $ua so that when requests
    # made against URLs in $apps the responses
    # come from the apps in $apps.
@@ -42,10 +42,10 @@ Write your own wrapper:
    my $self = shift;
    my $req  = shift;   # this isa HTTP::Request
    my %options = @_;
-   
+ 
    my $self = $self->ua;
    my $res;
-   
+ 
    if($options{follow_redirects})
    {
      # make a request using $ua, store
@@ -53,7 +53,7 @@ Write your own wrapper:
      # follow any redirects if $ua supports
      # that.
      my $res = eval { ... };
-     
+ 
      # on a CONNECTION error, you should throw
      # an exception using $self->error.  This should
      # NOT be used for 400 or 500 responses that
@@ -72,7 +72,7 @@ Write your own wrapper:
      # NOT follow any redirects.
      ...
    }
-   
+ 
    $res;
  }
  
@@ -125,7 +125,7 @@ my %instance;
 
 sub new
 {
-  my($class, $ua) = @_;  
+  my($class, $ua) = @_;
 
   if($class eq __PACKAGE__)
   {
@@ -146,7 +146,7 @@ sub new
         }
       }
     }
-    
+
     if(defined $class)
     {
       return $class->new($ua);
@@ -156,7 +156,7 @@ sub new
       Carp::croak("user agent @{[ ref $ua ]} not supported ");
     }
   }
-  
+
   bless {
     ua   => $ua,
   }, $class;
@@ -256,7 +256,9 @@ sub register
 
 package Test2::Tools::HTTP::UA::Error;
 
-use overload '""' => sub { shift->as_string };
+use overload
+  '""' => sub { shift->as_string },
+  bool => sub { 1 }, fallback => 1;
 
 sub message { shift->{message} }
 sub res { shift->{res} }

@@ -18,6 +18,7 @@ $modules{$_} = $_ for qw(
   HTTP::Response
   LWP::Protocol
   LWP::UserAgent
+  List::SomeUtils
   Plack
   Test2::API
   Test2::Compare

@@ -23,7 +23,7 @@ http_request(
     # http_response {} is a subclass of object {}
     # for HTTP::Response objects only, so you can
     # also use object {} style comparisons:
-    call code => 200; 
+    call code => 200;
 
     http_content_type match qr/^text\/(html|plain)$/;
     http_content_type_charset 'UTF-8';
@@ -78,8 +78,8 @@ make requests against PSGI apps.  [LWP::UserAgent](https://metacpan.org/pod/LWP:
 others assuming an appropriate user agent wrapper class is available ([Test2::Tools::HTTP::UA](https://metacpan.org/pod/Test2::Tools::HTTP::UA)).
 
 By default it uses long function names with either a `http_` or `psgi_app_` prefix.  The intent is to make the module
-usable when you are importing lots of symbols from lots of different testing tools while reducing the chance of name 
-collisions.  You can instead import `:short` which will give you the most commonly used tools with short names. 
+usable when you are importing lots of symbols from lots of different testing tools while reducing the chance of name
+collisions.  You can instead import `:short` which will give you the most commonly used tools with short names.
 The short names are indicated below in square brackets, and were chosen to not conflict with [Test2::V0](https://metacpan.org/pod/Test2::V0).
 
 # FUNCTIONS
@@ -228,7 +228,7 @@ http_request(
     # list as scalar, will match either:
     #     X-Foo: A
     #     X-Foo: B
-    # or 
+    # or
     #     X-Foo: A,B
     http_header 'X-Foo', 'A,B';
 
@@ -407,17 +407,17 @@ the internet or other PSGI apps.
 psgi_add_add 'http://foo.test' => sub { ... };
 
 subtest 'mysubtest' => sub {
-  my $guard = psgi_app_guard 
+  my $guard = psgi_app_guard
     'http://foo.test' => sub { ... },
     'https://www.google.com' => sub { ... };
-    
+
   http_request
     # gets the foo.test for this scope.
     GET('http://foo.test'),
     http_response {
       ...
     };
-  
+
   http_request
     # gets the mock google
     GET('https://www.google.com'),
@@ -449,7 +449,7 @@ attempt to call it in void context.
 
 - [Test::Mojo](https://metacpan.org/pod/Test::Mojo)
 
-    This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a [Mojolicious](https://metacpan.org/pod/Mojolicious) 
+    This is a very capable web application testing module.  Definitely worth checking out, even if you aren't developing a [Mojolicious](https://metacpan.org/pod/Mojolicious)
     app since it can be used (with [Test::Mojo::Role::PSGI](https://metacpan.org/pod/Test::Mojo::Role::PSGI)) to test any PSGI application.
 
 - [Plack::Test](https://metacpan.org/pod/Plack::Test)

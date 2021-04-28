@@ -61,7 +61,7 @@ sub instrument
       $orig;
     };
   }
-  
+
   $ua ||= LWP::UserAgent->new;
 }
 
@@ -103,7 +103,7 @@ sub apps { Test2::Tools::HTTP::UA->apps }
 sub request
 {
   my($self, $req, $proxy, $arg, @rest) = @_;
-  
+
   if(my $app = $self->apps->uri_to_app($req->uri))
   {
     my $env = req_to_psgi $req;
