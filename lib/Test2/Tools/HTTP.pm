@@ -902,7 +902,7 @@ sub psgi_app_guard
 {
   my(%h) = @_ == 1 ? (http_base_url, @_) : (@_);
 
-  Carp::croak "psgi_app_guard called in void context" unless defined wantarray;  ## no critic (Freenode::Wantarray)
+  Carp::croak "psgi_app_guard called in void context" unless defined wantarray;  ## no critic (Community::Wantarray)
 
   my %save;
   my $apps = Test2::Tools::HTTP::Apps->new;
