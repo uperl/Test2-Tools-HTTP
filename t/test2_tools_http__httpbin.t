@@ -93,7 +93,7 @@ is(
 is(
   intercept {
     $ret = http_request(
-      GET('http://bogus.httpbin.org/status/200'),
+      GET('http://bogus.httpbin.org./status/200'),
     );
   },
   array {
