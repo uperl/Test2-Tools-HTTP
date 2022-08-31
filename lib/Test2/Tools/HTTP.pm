@@ -209,7 +209,7 @@ sub http_request
     if($delta)
     {
       $ok = 0;
-      push @diag, $delta->diag;
+      push @diag, $delta->diag->as_string;
     }
   }
 
