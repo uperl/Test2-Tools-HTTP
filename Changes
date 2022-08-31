@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Fix diagnostic output (gh#7)
 
 0.10      2022-03-30 06:14:31 -0600
   - Update test to use trailing dot (.) to avoid possible wildcard
