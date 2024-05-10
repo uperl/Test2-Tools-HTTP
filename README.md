@@ -380,7 +380,7 @@ psgi_app_add $url, $app;
 Add the given PSGI app to the testing environment.  If you provide a URL, then requests to that URL will be intercepted by `http_request` and routed to the app
 instead of making a real HTTP request via [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent).
 
-## psgi\_app\_del
+## psgi\_app\_del \[app\_del\]
 
 ```
 psgi_app_del;
@@ -389,7 +389,7 @@ psgi_app_del $url;
 
 Remove the app at the given (or default) URL.
 
-## psgi\_app\_guard
+## psgi\_app\_guard \[app\_guard\]
 
 ```perl
 my $guard = psgi_app_guard $app;
