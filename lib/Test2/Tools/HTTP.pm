@@ -17,7 +17,7 @@ use Carp ();
 
 our %EXPORT_TAGS = (
   short => [qw(
-    app_add req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers header
+    app_add app_del app_guard req ua res code message content content_type charset content_length content_length_ok location location_uri tx headers header
   )],
 );
 
@@ -34,11 +34,13 @@ our @EXPORT_OK = (
   @{ $EXPORT_TAGS{'short'} },
 );
 
-*ua      = \&http_ua;
-*req     = \&http_request;
-*res     = \&http_response;
-*app_add = \&psgi_app_add;
-*charset = \&http_content_type_charset;
+*ua        = \&http_ua;
+*req       = \&http_request;
+*res       = \&http_response;
+*app_add   = \&psgi_app_add;
+*app_del   = \&psgi_app_del;
+*app_guard = \&psgi_app_guard;
+*charset   = \&http_content_type_charset;
 
 foreach my $short (qw( code message content content_type content_length content_length_ok location location_uri tx header headers ))
 {
@@ -827,7 +829,7 @@ sub psgi_app_add
   return;
 }
 
-=head2 psgi_app_del
+=head2 psgi_app_del [app_del]
 
  psgi_app_del;
  psgi_app_del $url;
@@ -844,7 +846,7 @@ sub psgi_app_del
   return;
 }
 
-=head2 psgi_app_guard
+=head2 psgi_app_guard [app_guard]
 
  my $guard = psgi_app_guard $app;
  my $guard = psgi_app_guard $url, $app;
