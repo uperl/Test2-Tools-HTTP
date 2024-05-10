@@ -1,4 +1,4 @@
-# Test2::Tools::HTTP ![static](https://github.com/uperl/Test2-Tools-HTTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/Test2-Tools-HTTP/workflows/linux/badge.svg) ![macos](https://github.com/uperl/Test2-Tools-HTTP/workflows/macos/badge.svg) ![windows](https://github.com/uperl/Test2-Tools-HTTP/workflows/windows/badge.svg) ![cygwin](https://github.com/uperl/Test2-Tools-HTTP/workflows/cygwin/badge.svg) ![msys2-mingw](https://github.com/uperl/Test2-Tools-HTTP/workflows/msys2-mingw/badge.svg)
+# Test2::Tools::HTTP ![static](https://github.com/uperl/Test2-Tools-HTTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/Test2-Tools-HTTP/workflows/linux/badge.svg)
 
 Test HTTP / PSGI
 
