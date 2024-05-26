@@ -2,7 +2,7 @@ package Test2::Tools::HTTP::Apps;
 
 use strict;
 use warnings;
-use 5.012;
+use 5.014;
 use URI;
 
 # ABSTRACT: App container class for Test2::Tools::HTTP

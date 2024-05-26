@@ -2,7 +2,7 @@ package Test2::Tools::HTTP;
 
 use strict;
 use warnings;
-use 5.012;
+use 5.014;
 use LWP::UserAgent;
 use parent qw( Exporter );
 use Test2::API qw( context );
