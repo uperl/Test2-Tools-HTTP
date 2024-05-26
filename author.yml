@@ -27,6 +27,7 @@ pod_coverage:
     - Test2::Tools::HTTP::UA::LWPClass
     - Test2::Tools::HTTP#app_add
     - Test2::Tools::HTTP#app_del
+    - Test2::Tools::HTTP#app_guard
     - Test2::Tools::HTTP#charset
     - Test2::Tools::HTTP#code
     - Test2::Tools::HTTP#content
