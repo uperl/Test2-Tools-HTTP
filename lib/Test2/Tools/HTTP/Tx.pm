@@ -2,7 +2,7 @@ package Test2::Tools::HTTP::Tx;
 
 use strict;
 use warnings;
-use 5.012;
+use 5.014;
 use Test2::API ();
 use Carp ();
 

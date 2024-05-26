@@ -2,7 +2,7 @@ package Test2::Require::Internet;
 
 use strict;
 use warnings;
-use 5.012;
+use 5.014;
 use IO::Socket::INET;
 use parent qw( Test2::Require );
 

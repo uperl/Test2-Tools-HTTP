@@ -2,7 +2,7 @@ package Test2::Tools::HTTP::UA::LWP;
 
 use strict;
 use warnings;
-use 5.012;
+use 5.014;
 use URI;
 use parent 'Test2::Tools::HTTP::UA';
 
