@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.12      2024-05-25 20:46:25 -0600
   - Added shortcuts for app_del and app_guard (gh#8)
   - Require Perl 5.14 or better (Plack now also
     requires 5.12 and IO::Socket::IP requires 5.14;
