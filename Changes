@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
   - Added shortcuts for app_del and app_guard (gh#8)
+  - Require Perl 5.12 or better (Plack now also
+    requires this).
 
 0.11      2022-08-31 06:24:35 -0600
   - Fix diagnostic output (gh#7)

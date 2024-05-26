@@ -2,6 +2,7 @@ package Test2::Tools::HTTP::UA;
 
 use strict;
 use warnings;
+use 5.012;
 use Carp ();
 use File::Spec ();
 use Test2::Tools::HTTP::Apps;
