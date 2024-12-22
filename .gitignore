@@ -1,3 +1,5 @@
 /Test2-Tools-HTTP-*
 /.build
 *.swp
+*.old
+*.orig
